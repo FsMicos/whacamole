@@ -1,0 +1,39 @@
+/* src/assets/css/styles.css */
+
+body {
+  background-image: url('/img/fondo.png'); /* Ruta a tu fondo */
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 600px;
+  margin: 20px auto;
+}
+
+.hole {
+  width: 200px;
+  height: 200px;
+  background-image: url('/img/agujero.png'); /* Ruta a tu imagen del agujero */
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+}
+
+.mole {
+  width: 100%;
+  height: 100%;
+  background-image: url('/img/topo.png'); /* Ruta a tu imagen del topo */
+  background-size: contain;
+  background-position: bottom;
+  position: absolute;
+  bottom: -100%; /* El topo empieza oculto */
+  transition: all 0.4s;
+}
+
+/* Clase que se añade con JS para que el topo aparezca */
+.hole.up .mole {
+  bottom: 0;
+}
