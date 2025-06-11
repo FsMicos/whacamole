@@ -1,39 +1,88 @@
-/* src/assets/css/styles.css */
-
-body {
-  background-image: url('/img/fondo.png'); /* Ruta a tu fondo */
-  text-align: center;
+html, body {
+  height: 100%; /* Obliga al HTML y al Body a ocupar toda la altura de la ventana */
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  color: #333;
 }
 
+body {
+  /* Configuración del fondo para que ocupe toda la pantalla */
+  background-image: url('/img/fondo.jpg'); /* Ruta a tu fondo */
+  background-size: cover; /* Escala la imagen para cubrir todo el contenedor sin deformarse */
+  background-position: center; /* Centra la imagen */
+  background-repeat: no-repeat; /* Evita que la imagen se repita */
+
+  /* Usamos Flexbox para posicionar los elementos verticalmente */
+  display: flex;
+  flex-direction: column; /* Alinea los hijos (títulos, juego) en una columna */
+  align-items: center; /* Centra todo horizontalmente */
+}
+
+/* === 2. TÍTULOS Y TEXTO === */
+h1, h2 {
+  background-color: rgba(255, 255, 255, 0.7); /* Fondo semi-transparente para legibilidad */
+  padding: 5px 15px;
+  border-radius: 10px;
+}
+
+/* === 3. CUADRÍCULA DEL JUEGO === */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 600px;
-  margin: 20px auto;
+  /* Usamos las dimensiones de tu imagen de agujero para calcular el gap */
+  gap: 30px; 
+  /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
+  margin-top: auto; 
 }
 
+/* === 4. ESTILOS DEL AGUJERO === */
 .hole {
-  width: 200px;
-  height: 200px;
+  /*
+    PROPORCIONES DEL AGUJERO:335x115.
+    Mantenemos esa proporción. Por ejemplo, con un ancho de 250px:
+    (115 / 335) * 250px = 85.8px. Usaremos 86px.
+  */
+  width: 250px;
+  height: 86px;
+  
   background-image: url('/img/agujero.png'); /* Ruta a tu imagen del agujero */
-  background-size: cover;
-  position: relative;
-  overflow: hidden;
+  background-size: contain; /* 'contain' asegura que la imagen completa quepa dentro del div */
+  background-repeat: no-repeat;
+  background-position: center;
+
+  position: relative; /* Necesario para que el topo se posicione dentro del agujero */
+  overflow: hidden; /* Oculta al topo cuando está "debajo" */
 }
 
+/* === 5. ESTILOS DEL TOPO === */
 .mole {
   width: 100%;
   height: 100%;
-  background-image: url('/img/topo.png'); /* Ruta a tu imagen del topo */
-  background-size: contain;
-  background-position: bottom;
+
+  background-image: url('/img/topo_1.png'); /* Ruta a tu imagen del topo */
+  background-size: contain; /* 'contain' también aquí para que el topo no se corte */
+  background-repeat: no-repeat;
+  background-position: center bottom; /* Alinea el topo en el fondo y al centro */
+
   position: absolute;
-  bottom: -100%; /* El topo empieza oculto */
-  transition: all 0.4s;
+  bottom: -100%; /* El topo empieza oculto (100% de la altura del .hole) */
+  transition: all 0.3s; /* Animación suave cuando aparece */
 }
 
 /* Clase que se añade con JS para que el topo aparezca */
 .hole.up .mole {
-  bottom: 0;
+  bottom: 0; /* Mueve el topo a la posición visible */
+}
+
+/* === 6. BOTÓN DE INICIO === */
+button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 2px solid #555;
+  margin-top: 20px; /* Espacio entre la cuadrícula y el botón */
+  /* El último elemento necesita un margen inferior para que no quede pegado al borde */
+  margin-bottom: 5vh; /* 5% de la altura de la ventana como espacio inferior */
 }
