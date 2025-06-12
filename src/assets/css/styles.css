@@ -52,45 +52,54 @@ h1, h2 {
 
 /* ESTILOS DEL TOPO === */
 .mole {
-  /* CAMBIO AQUÍ: Las dimensiones ahora son las de UN SOLO cuadro del sprite */
-  width: 150px; 
-  height: 108px;
-
-  /* CAMBIO AQUÍ: El fondo es la imagen del SPRITESHEET completo */
-  background-image: url('/img/topo-sprite.png');
-  
-  /* CAMBIO AQUÍ: El tamaño del fondo es el del SPRITESHEET completo */
-  background-size: 900px 108px; /* Ancho total, Alto total */
+  width: 150px; /* Width of a single frame */
+  height: 108px; /* Height of a single frame */
+  background-size: 900px 108px; /* Total width of the sprite sheet (6 frames * 150px) */
   background-repeat: no-repeat;
-  
-  /* La posición inicial del fondo es (0,0), mostrando el primer topo */
-  background-position: 0 0;
+  background-position: 0 0; /* Starts at the first frame */
 
   position: absolute;
-  bottom: -100%; 
-  transition: bottom 0.3s; 
   left: 50%;
   transform: translateX(-50%);
+  bottom: -100%; /* Initially hidden below the hole */
+  transition: bottom 0.3s; /* Smooth transition when mole appears/disappears */
 }
 
-/* CAMBIO AQUÍ: Esta es la nueva animación para el sprite */
-@keyframes animateMoleSprite {
-  /* La animación moverá la posición del fondo hacia la izquierda */
-  from { background-position-x: 0; }
-  to { background-position-x: -900px; } /* Lo movemos el ancho total del sprite */
+.mole.normal {
+  background-image: url('/img/topo-sprite.png'); /* Sprite for the normal mole */
+  animation: animateMoleNormal 0.4s steps(3) infinite; /* 0.6s duration, 6 steps (frames), loops infinitely */
 }
 
+@keyframes animateMoleNormal {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -900px;
+  } /* Moves the background across the entire sprite width */
+}
+
+.mole.hit {
+  background-image: url('/img/topo-hit-sprite.png');
+  background-position: 0 0;
+  animation: none; /* Desactiva cualquier animación previa */
+  /* mole.hit {
+  background-image: url('/img/topo-hit-sprite.png'); /* Sprite for the hit mole 
+  animation: animateMoleHit 0.4s steps(3) 1; 0.6s duration, 6 steps, plays once (1) */
+}
+
+@keyframes animateMoleHit {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -900px;
+  } /* Moves the background across the entire sprite width */
+}
 /* Clase que se añade con JS para que el topo aparezca */
 .hole.up .mole {
   bottom: 0;
 
-  /* CAMBIO AQUÍ: Aplicamos la nueva animación de sprite */
-  animation-name: animateMoleSprite;
-  animation-duration: 0.4s; /* Duración total de la animación */
-  animation-iteration-count: infinite;
-
-  /* ¡LA CLAVE! Le decimos que divida la animación en 5 pasos (tus 5 cuadros) */
-  animation-timing-function: steps(3);
 }
 
 /* === 6. BOTÓN DE INICIO === */
