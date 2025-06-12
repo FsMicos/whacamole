@@ -7,116 +7,151 @@ document.addEventListener('DOMContentLoaded', () => {
   let score = 0;
   let currentTime = 60;
   let timerId = null;
-  let moleTimerId = null; // Variable declarada correctamente
+  let moleTimerId = null;
   let molePosition = null;
+  let gameActive = false;
 
   // Datos para adaptación
   let totalMoles = 0;
   let successfulHits = 0;
   let reactionTimes = [];
   let moleStartTime = 0;
-  let moleInterval = 800; // Intervalo inicial en ms
+  let moleInterval = 3000; // Intervalo inicial MUY LENTO (3 segundos)
+  let consecutiveMisses = 0; // Contador de fallos consecutivos
+  let consecutiveHits = 0; // Contador de aciertos consecutivos
 
   // 1. Hacer que un topo aparezca aleatoriamente
   function randomMole() {
+    if (!gameActive) return; // Solo funcionar si el juego está activo
+
+    // Si hay un topo anterior sin golpear, contarlo como fallo
+    if (molePosition && molePosition.classList.contains('up')) {
+      molePosition.classList.remove('up');
+      consecutiveMisses++;
+      consecutiveHits = 0; // Reiniciar contador de aciertos
+      console.log(`❌ Fallo! Fallos consecutivos: ${consecutiveMisses}`);
+    }
+
     holes.forEach(hole => hole.classList.remove('up')); // Oculta todos los topos
 
     let randomHole = holes[Math.floor(Math.random() * holes.length)];
     randomHole.classList.add('up');
 
     molePosition = randomHole;
-    moleStartTime = Date.now(); // Guardar el momento en que apareció el topo
+    moleStartTime = Date.now();
     totalMoles++;
+
+    console.log(`🐹 Topo #${totalMoles} apareció. Intervalo: ${moleInterval}ms`);
+    
+    // Recalcular dificultad cada vez que aparece un topo
+    ajustarDificultad();
   }
 
   // 2. Contar los golpes
   holes.forEach(hole => {
     hole.addEventListener('click', () => {
-      if (hole === molePosition) {
+      if (!gameActive) return; // Solo funcionar si el juego está activo
+      
+      if (hole === molePosition && hole.classList.contains('up')) {
         score++;
-        successfulHits++; // CORREGIDO: Incrementar aciertos exitosos
+        successfulHits++;
+        consecutiveHits++;
+        consecutiveMisses = 0; // Reiniciar contador de fallos
         scoreBoard.textContent = score;
+        
         const reactionTime = Date.now() - moleStartTime;
         reactionTimes.push(reactionTime);
-        molePosition.classList.remove('up'); // Ocultar el topo después de un acierto
-        ajustarDificultad(); // Recalcular dificultad después de cada acierto
-        molePosition = null; // Limpiar la posición del topo
+        
+        console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
+        
+        molePosition.classList.remove('up');
+        molePosition = null;
       }
     });
   });
 
-  // 3. Ajustar la dificultad
+  // 3. Ajustar la dificultad - CAMBIOS MUY SIGNIFICATIVOS
   function ajustarDificultad() {
-    // Solo ajustar después de al menos 3 topos para tener datos suficientes
-    if (totalMoles < 3) return;
+    if (totalMoles < 1) return;
 
     const tasaAciertos = successfulHits / totalMoles;
-    const promedioReaccion = reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length;
+    let nuevoIntervalo = moleInterval;
 
-    console.log(`Tasa de aciertos: ${tasaAciertos.toFixed(2)}, Promedio reacción: ${promedioReaccion.toFixed(0)}ms, Intervalo actual: ${moleInterval}ms`);
-
-    // Ajuste básico de dificultad
-    if (tasaAciertos > 0.7 && promedioReaccion < 1000) {
-      // Jugador está bien, aumentar dificultad (reducir intervalo)
-      moleInterval = Math.max(300, moleInterval - 50); // Reducir de 50ms en 50ms
-      console.log(`Aumentando dificultad. Nuevo intervalo: ${moleInterval}ms`);
-    } else if (tasaAciertos < 0.4 || promedioReaccion > 1500) {
-      // Jugador tiene dificultades, reducir dificultad (aumentar intervalo)
-      moleInterval = Math.min(1200, moleInterval + 50); // Aumentar de 50ms en 50ms
-      console.log(`Reduciendo dificultad. Nuevo intervalo: ${moleInterval}ms`);
+    // REGLA CRÍTICA: Fallos consecutivos - bajar MUCHO la velocidad
+    if (consecutiveMisses >= 3) {
+      nuevoIntervalo = Math.min(5000, moleInterval + 1000); // Aumentar 1 segundo por cada 3 fallos
+      console.log(`🚨 3+ fallos consecutivos! Reduciendo velocidad drásticamente a ${nuevoIntervalo}ms`);
+    }
+    // REGLA CRÍTICA: Muchos aciertos consecutivos - subir MUCHO la velocidad  
+    else if (consecutiveHits >= 5) {
+      nuevoIntervalo = Math.max(800, moleInterval - 500); // Reducir medio segundo por cada 5 aciertos
+      console.log(`🔥 5+ aciertos consecutivos! Aumentando velocidad drásticamente a ${nuevoIntervalo}ms`);
+    }
+    // Ajustes normales pero MUY SIGNIFICATIVOS
+    else if (tasaAciertos >= 0.8) {
+      // Muy bueno - acelerar MUCHO
+      nuevoIntervalo = Math.max(800, moleInterval - 400);
+      console.log(`🚀 Excelente rendimiento! Acelerando a ${nuevoIntervalo}ms`);
+    } else if (tasaAciertos >= 0.6) {
+      // Bien - acelerar bastante
+      nuevoIntervalo = Math.max(800, moleInterval - 200);
+      console.log(`⬆️ Buen rendimiento! Acelerando a ${nuevoIntervalo}ms`);
+    } else if (tasaAciertos < 0.3) {
+      // Muy mal - desacelerar MUCHO
+      nuevoIntervalo = Math.min(5000, moleInterval + 600);
+      console.log(`⬇️ Rendimiento bajo! Desacelerando a ${nuevoIntervalo}ms`);
+    } else if (tasaAciertos < 0.5) {
+      // Mal - desacelerar bastante
+      nuevoIntervalo = Math.min(5000, moleInterval + 300);
+      console.log(`📉 Rendimiento regular! Desacelerando a ${nuevoIntervalo}ms`);
     }
 
-    // Reiniciar el intervalo con el nuevo valor
-    clearInterval(moleTimerId);
-    moleTimerId = setInterval(randomMole, moleInterval);
-  }
-
-  // 4. Función para limpiar el estado de los topos perdidos
-  function handleMissedMole() {
-    if (molePosition && molePosition.classList.contains('up')) {
-      molePosition.classList.remove('up');
-      // No incrementamos successfulHits aquí, solo totalMoles ya se incrementó
-      ajustarDificultad(); // Recalcular dificultad después de un fallo
+    // Aplicar cambio si es significativo
+    if (Math.abs(nuevoIntervalo - moleInterval) >= 100) {
+      moleInterval = nuevoIntervalo;
+      console.log(`🔄 CAMBIO APLICADO - Nuevo intervalo: ${moleInterval}ms`);
+      
+      // Reiniciar intervalo inmediatamente
+      if (moleTimerId) {
+        clearInterval(moleTimerId);
+        moleTimerId = setInterval(randomMole, moleInterval);
+      }
     }
-    molePosition = null;
+
+    // Mostrar estadísticas
+    console.log(`📊 Estadísticas: ${successfulHits}/${totalMoles} (${(tasaAciertos * 100).toFixed(1)}%)`);
   }
 
-  // 5. Modificar randomMole para manejar topos perdidos
-  function randomMoleWithCleanup() {
-    // Limpiar topo anterior si no fue golpeado
-    handleMissedMole();
-    
-    // Crear nuevo topo
-    randomMole();
-  }
-
-  // 6. Iniciar el juego
+  // 4. Iniciar el juego
   function startGame() {
     // Limpiar intervalos anteriores
     if (timerId) clearInterval(timerId);
     if (moleTimerId) clearInterval(moleTimerId);
 
-    // Reiniciar variables
+    // Reiniciar TODAS las variables
+    gameActive = true;
     score = 0;
     currentTime = 60;
-    moleInterval = 800; // Empezar lento
+    moleInterval = 3000; // EMPEZAR MUY LENTO (3 segundos)
     totalMoles = 0;
     successfulHits = 0;
     reactionTimes = [];
     molePosition = null;
+    consecutiveMisses = 0;
+    consecutiveHits = 0;
     
     // Actualizar UI
     scoreBoard.textContent = score;
     timeLeft.textContent = currentTime;
 
-    // Ocultar todos los topos
+    // IMPORTANTE: Ocultar TODOS los topos al inicio
     holes.forEach(hole => hole.classList.remove('up'));
 
-    // Iniciar el primer topo
-    setTimeout(() => {
-      randomMole();
-      moleTimerId = setInterval(randomMoleWithCleanup, moleInterval);
-    }, 1000); // Dar un segundo antes de empezar
+    console.log("🎮 ¡Juego iniciado! Intervalo inicial: " + moleInterval + "ms (MUY LENTO para niños)");
+
+    // Iniciar los topos INMEDIATAMENTE cuando se presiona el botón
+    randomMole(); // Primer topo
+    moleTimerId = setInterval(randomMole, moleInterval);
 
     // Contador de tiempo
     timerId = setInterval(() => {
@@ -124,22 +159,70 @@ document.addEventListener('DOMContentLoaded', () => {
       timeLeft.textContent = currentTime;
 
       if (currentTime === 0) {
+        // TERMINAR EL JUEGO
+        gameActive = false;
         clearInterval(timerId);
         clearInterval(moleTimerId);
         
-        // Limpiar topos al final
+        // IMPORTANTE: Ocultar TODOS los topos al final
         holes.forEach(hole => hole.classList.remove('up'));
+        molePosition = null;
         
         const tasaFinal = totalMoles > 0 ? (successfulHits / totalMoles * 100).toFixed(1) : 0;
-        alert(`¡Juego Terminado!\nPuntuación final: ${score}\nTopos totales: ${totalMoles}\nTasa de aciertos: ${tasaFinal}%`);
+        const promedioReaccion = reactionTimes.length > 0 
+          ? (reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0)
+          : 0;
+        
+        console.log("🏁 Juego terminado");
+        alert(`¡Juego Terminado! 🎉\n\n🎯 Puntuación: ${score}\n🐹 Topos totales: ${totalMoles}\n✅ Aciertos: ${successfulHits}\n📊 Tasa de éxito: ${tasaFinal}%\n⏱️ Tiempo promedio: ${promedioReaccion}ms\n\n¡Excelente trabajo entrenando tu coordinación! 👏`);
       }
     }, 1000);
   }
 
-  // (Opcional) Añadir un botón para empezar el juego
+  // Botón de inicio con estilo muy atractivo para niños
   const startButton = document.createElement('button');
-  startButton.textContent = '¡Empezar a Jugar!';
-  startButton.style.cssText = 'margin: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer;';
+  startButton.textContent = '🎮 ¡EMPEZAR A JUGAR!';
+  startButton.style.cssText = `
+    margin: 20px; 
+    padding: 20px 40px; 
+    font-size: 24px; 
+    font-weight: bold;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+    background-size: 200% 200%;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    animation: gradientShift 2s ease infinite;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  `;
+  
+  // Agregar animación CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  startButton.addEventListener('mouseover', () => {
+    startButton.style.transform = 'scale(1.1) rotate(-2deg)';
+    startButton.style.boxShadow = '0 8px 16px rgba(0,0,0,0.4)';
+  });
+  
+  startButton.addEventListener('mouseout', () => {
+    startButton.style.transform = 'scale(1) rotate(0deg)';
+    startButton.style.boxShadow = '0 6px 12px rgba(0,0,0,0.3)';
+  });
+  
   document.body.appendChild(startButton);
   startButton.addEventListener('click', startGame);
+
+  // Asegurar que no hay topos al cargar la página
+  holes.forEach(hole => hole.classList.remove('up'));
 });
