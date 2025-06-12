@@ -83,8 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log(`🚨 3+ fallos consecutivos! Reduciendo velocidad drásticamente a ${nuevoIntervalo}ms`);
     }
     // REGLA CRÍTICA: Muchos aciertos consecutivos - subir MUCHO la velocidad  
+    else if (consecutiveHits >= 8) {
+      nuevoIntervalo = Math.max(300, moleInterval - 800); // Reducir casi un segundo por cada 8 aciertos
+      console.log(`🔥 8+ aciertos consecutivos! Aumentando velocidad EXTREMA a ${nuevoIntervalo}ms`);
+    }
     else if (consecutiveHits >= 5) {
-      nuevoIntervalo = Math.max(800, moleInterval - 500); // Reducir medio segundo por cada 5 aciertos
+      nuevoIntervalo = Math.max(400, moleInterval - 600); // Reducir 600ms por cada 5 aciertos
       console.log(`🔥 5+ aciertos consecutivos! Aumentando velocidad drásticamente a ${nuevoIntervalo}ms`);
     }
     // Ajustes normales pero MUY SIGNIFICATIVOS
@@ -124,6 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Iniciar el juego
   function startGame() {
+    // Si el juego ya está en progreso, no hacer nada
+    if (gameInProgress) return;
+
+    // Cambiar el botón durante el juego
+    gameInProgress = true;
+    startButton.textContent = '🎯 ¡Jugando! ¡Dale a los topos!';
+    startButton.style.background = 'linear-gradient(45deg, #FF8A80, #FFD54F)';
+    startButton.disabled = true;
+    startButton.style.cursor = 'not-allowed';
+    startButton.style.opacity = '0.8';
     // Limpiar intervalos anteriores
     if (timerId) clearInterval(timerId);
     if (moleTimerId) clearInterval(moleTimerId);
@@ -174,14 +188,25 @@ document.addEventListener('DOMContentLoaded', () => {
           : 0;
         
         console.log("🏁 Juego terminado");
+        
+        // Restaurar el botón al estado original
+        gameInProgress = false;
+        startButton.textContent = buttonOriginalText;
+        startButton.style.background = 'linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1)';
+        startButton.disabled = false;
+        startButton.style.cursor = 'pointer';
+        startButton.style.opacity = '1';
+        
         alert(`¡Juego Terminado! 🎉\n\n🎯 Puntuación: ${score}\n🐹 Topos totales: ${totalMoles}\n✅ Aciertos: ${successfulHits}\n📊 Tasa de éxito: ${tasaFinal}%\n⏱️ Tiempo promedio: ${promedioReaccion}ms\n\n¡Excelente trabajo entrenando tu coordinación! 👏`);
       }
     }, 1000);
   }
 
-  // Botón de inicio con estilo muy atractivo para niños
+  // Botón de inicio con cambio de estado
   const startButton = document.createElement('button');
   startButton.textContent = '🎮 ¡EMPEZAR A JUGAR!';
+  let buttonOriginalText = '🎮 ¡EMPEZAR A JUGAR!';
+  let gameInProgress = false;
   startButton.style.cssText = `
     margin: 20px; 
     padding: 20px 40px; 
