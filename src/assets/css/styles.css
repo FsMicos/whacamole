@@ -30,7 +30,7 @@ h1, h2 {
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* Usamos las dimensiones de tu imagen de agujero para calcular el gap */
+  /* Usamos las dimensiones de la imagen del agujero para calcular el gap */
   gap: 30px; 
   /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
   margin-top: auto; 
@@ -38,41 +38,59 @@ h1, h2 {
 
 /* === 4. ESTILOS DEL AGUJERO === */
 .hole {
-  /*
-    PROPORCIONES DEL AGUJERO:335x115.
-    Mantenemos esa proporción. Por ejemplo, con un ancho de 250px:
-    (115 / 335) * 250px = 85.8px. Usaremos 86px.
-  */
+ 
   width: 250px;
-  height: 86px;
+  height: 108px;
   
   background-image: url('/img/agujero.png'); /* Ruta a tu imagen del agujero */
-  background-size: contain; /* 'contain' asegura que la imagen completa quepa dentro del div */
+  background-size: 250px 108px; /* 'contain' asegura que la imagen completa quepa dentro del div */
   background-repeat: no-repeat;
   background-position: center;
-
   position: relative; /* Necesario para que el topo se posicione dentro del agujero */
   overflow: hidden; /* Oculta al topo cuando está "debajo" */
 }
 
-/* === 5. ESTILOS DEL TOPO === */
+/* ESTILOS DEL TOPO === */
 .mole {
-  width: 100%;
-  height: 100%;
+  /* CAMBIO AQUÍ: Las dimensiones ahora son las de UN SOLO cuadro del sprite */
+  width: 150px; 
+  height: 108px;
 
-  background-image: url('/img/topo_1.png'); /* Ruta a tu imagen del topo */
-  background-size: contain; /* 'contain' también aquí para que el topo no se corte */
+  /* CAMBIO AQUÍ: El fondo es la imagen del SPRITESHEET completo */
+  background-image: url('/img/topo-sprite.png');
+  
+  /* CAMBIO AQUÍ: El tamaño del fondo es el del SPRITESHEET completo */
+  background-size: 900px 108px; /* Ancho total, Alto total */
   background-repeat: no-repeat;
-  background-position: center bottom; /* Alinea el topo en el fondo y al centro */
+  
+  /* La posición inicial del fondo es (0,0), mostrando el primer topo */
+  background-position: 0 0;
 
   position: absolute;
-  bottom: -100%; /* El topo empieza oculto (100% de la altura del .hole) */
-  transition: all 0.3s; /* Animación suave cuando aparece */
+  bottom: -100%; 
+  transition: bottom 0.3s; 
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* CAMBIO AQUÍ: Esta es la nueva animación para el sprite */
+@keyframes animateMoleSprite {
+  /* La animación moverá la posición del fondo hacia la izquierda */
+  from { background-position-x: 0; }
+  to { background-position-x: -900px; } /* Lo movemos el ancho total del sprite */
 }
 
 /* Clase que se añade con JS para que el topo aparezca */
 .hole.up .mole {
-  bottom: 0; /* Mueve el topo a la posición visible */
+  bottom: 0;
+
+  /* CAMBIO AQUÍ: Aplicamos la nueva animación de sprite */
+  animation-name: animateMoleSprite;
+  animation-duration: 0.4s; /* Duración total de la animación */
+  animation-iteration-count: infinite;
+
+  /* ¡LA CLAVE! Le decimos que divida la animación en 5 pasos (tus 5 cuadros) */
+  animation-timing-function: steps(3);
 }
 
 /* === 6. BOTÓN DE INICIO === */
