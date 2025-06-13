@@ -20,22 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let consecutiveMisses = 0;
   let consecutiveHits = 0;
 
-  // Carga el efecto de sonido (ya lo tenías)
+  // Carga el efecto de sonido
   const hitSound = new Audio('/media/Explosion.mp3');
   hitSound.preload = 'auto';
   hitSound.volume = 0.6;
 
-  // --- NUEVA ADICIÓN PARA LA MÚSICA DE FONDO ---
+  // Música de fondo
   const backgroundMusic = new Audio('/media/Kubbi.mp3');
-  backgroundMusic.loop = true; // Hace que la música se reproduzca en bucle
-  backgroundMusic.preload = 'auto'; // Pre-carga la música
-  backgroundMusic.volume = 0.3; // Ajusta el volumen de la música (generalmente más bajo que los efectos)
-  // ---------------------------------------------
+  backgroundMusic.loop = true;
+  backgroundMusic.preload = 'auto';
+  backgroundMusic.volume = 0.3;
 
   // 1. Hacer que un topo aparezca aleatoriamente
   function randomMole() {
     if (!gameActive) return;
 
+    // Verificar si hay un topo activo y no fue golpeado
     if (molePosition && molePosition.classList.contains('up')) {
       molePosition.classList.remove('up');
       consecutiveMisses++;
@@ -43,7 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log(`❌ Fallo! Fallos consecutivos: ${consecutiveMisses}`);
     }
 
-    holes.forEach(hole => hole.classList.remove('up'));
+    // Limpiar todos los agujeros
+    holes.forEach(hole => {
+      hole.classList.remove('up');
+      // CORRECCIÓN: Limpiar el estado del topo también
+      const mole = hole.querySelector('.mole');
+      if (mole) {
+        mole.classList.remove('hit');
+        mole.classList.add('normal');
+      }
+    });
 
     let randomHole = holes[Math.floor(Math.random() * holes.length)];
     randomHole.classList.add('up');
@@ -59,10 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Contar los golpes
   holes.forEach(hole => {
-    hole.addEventListener('click', () => {
+    hole.addEventListener('click', (event) => {
+      // Prevenir múltiples eventos
+      event.preventDefault();
+      event.stopPropagation();
+      
       if (!gameActive) return;
 
+      // CORRECCIÓN PRINCIPAL: Verificar que el agujero clickeado sea el activo
       if (hole === molePosition && hole.classList.contains('up')) {
+        // Inmediatamente marcar como inactivo para evitar doble clic
+        hole.classList.remove('up');
+        
         score++;
         successfulHits++;
         consecutiveHits++;
@@ -74,28 +91,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
 
+        // Reproducir sonido
         hitSound.currentTime = 0;
-        hitSound.play();
+        hitSound.play().catch(e => console.log('Error reproduciendo sonido:', e));
 
         const mole = hole.querySelector('.mole');
 
         if (mole) {
           mole.classList.remove('normal', 'hit');
+          // Forzar reflow para asegurar que la clase se aplique
           void mole.offsetWidth;
           mole.classList.add('hit');
 
+          // Limpiar después de la animación
           setTimeout(() => {
             mole.classList.remove('hit');
             mole.classList.add('normal');
-            hole.classList.remove('up');
-            molePosition = null;
           }, 600);
-        } else {
-          hole.classList.remove('up');
-          molePosition = null;
+        }
+
+        // Limpiar la posición del topo
+        molePosition = null;
+        
+      } else {
+        // CORRECCIÓN: Registrar clics fallidos solo si hay un topo activo
+        if (molePosition && molePosition.classList.contains('up')) {
+          console.log(`❌ Clic fallido - clickeaste el agujero equivocado`);
         }
       }
     });
+
+    // NUEVA ADICIÓN: Prevenir el evento de contexto (clic derecho)
+    hole.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    // NUEVA ADICIÓN: Mejorar la respuesta táctil para móviles
+    hole.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
   });
 
   // 3. Ajustar la dificultad
@@ -144,15 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function startGame() {
     if (gameInProgress) return;
 
-    // --- REPRODUCIR MÚSICA AL INICIAR ---
-    backgroundMusic.currentTime = 0; // Asegura que la música siempre empiece desde el inicio
+    // Reproducir música al iniciar
+    backgroundMusic.currentTime = 0;
     backgroundMusic.play().catch(error => {
-      // Captura y maneja errores de reproducción (ej. autoplay bloqueado por el navegador)
       console.warn('La reproducción automática de la música fue bloqueada:', error);
-      // Puedes añadir un mensaje al usuario para que haga clic en la pantalla para activar el audio
-      // o un botón de "Activar Sonido"
     });
-    // ------------------------------------
 
     gameInProgress = true;
     startButton.textContent = '🎯 ¡Jugando! ¡Dale a los topos!';
@@ -178,28 +208,47 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreBoard.textContent = score;
     timeLeft.textContent = currentTime;
 
-    holes.forEach(hole => hole.classList.remove('up'));
+    // Limpiar todos los agujeros al inicio
+    holes.forEach(hole => {
+      hole.classList.remove('up');
+      const mole = hole.querySelector('.mole');
+      if (mole) {
+        mole.classList.remove('hit');
+        mole.classList.add('normal');
+      }
+    });
 
-    console.log("🎮 ¡Juego iniciado! Intervalo inicial: " + moleInterval + "ms (MUY LENTO para niños)");
+    console.log("🎮 ¡Juego iniciado! Intervalo inicial: " + moleInterval + "ms");
 
-    randomMole();
-    moleTimerId = setInterval(randomMole, moleInterval);
+    // CORRECCIÓN: Esperar un poco antes del primer topo
+    setTimeout(() => {
+      if (gameActive) {
+        randomMole();
+        moleTimerId = setInterval(randomMole, moleInterval);
+      }
+    }, 1000);
 
     timerId = setInterval(() => {
       currentTime--;
       timeLeft.textContent = currentTime;
 
       if (currentTime === 0) {
-        // --- DETENER MÚSICA AL FINALIZAR ---
+        // Detener música al finalizar
         backgroundMusic.pause();
-        backgroundMusic.currentTime = 0; // Reinicia la música para la próxima vez
-        // ------------------------------------
+        backgroundMusic.currentTime = 0;
 
         gameActive = false;
         clearInterval(timerId);
         clearInterval(moleTimerId);
 
-        holes.forEach(hole => hole.classList.remove('up'));
+        holes.forEach(hole => {
+          hole.classList.remove('up');
+          const mole = hole.querySelector('.mole');
+          if (mole) {
+            mole.classList.remove('hit');
+            mole.classList.add('normal');
+          }
+        });
         molePosition = null;
 
         const tasaFinal = totalMoles > 0 ? (successfulHits / totalMoles * 100).toFixed(1) : 0;
