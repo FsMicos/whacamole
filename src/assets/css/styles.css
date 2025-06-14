@@ -50,6 +50,8 @@ h1, h2 {
   grid-template-columns: repeat(4, 1fr);
   /* Usamos las dimensiones de la imagen del agujero para calcular el gap */
   gap: 30px; 
+  padding: 20px;
+  margin-bottom: 5vh;
   /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
   margin-top: auto; 
 }
@@ -118,16 +120,4 @@ h1, h2 {
 .hole.up .mole {
   bottom: 0;
 
-}
-
-/* === 6. BOTÓN DE INICIO === */
-button {
-  padding: 10px 20px;
-  font-size: 1.2em;
-  cursor: pointer;
-  border-radius: 10px;
-  border: 2px solid #555;
-  margin-top: 20px; /* Espacio entre la cuadrícula y el botón */
-  /* El último elemento necesita un margen inferior para que no quede pegado al borde */
-  margin-bottom: 5vh; /* 5% de la altura de la ventana como espacio inferior */
 }

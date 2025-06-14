@@ -1,9 +1,11 @@
-// src/controllers/gameController.js
-
 const path = require('path');
 
+// Nueva función para servir la pantalla de inicio
+exports.serveHome = (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../views/index.html'));
+};
+
+// Función para servir la pantalla del juego
 exports.serveGame = (req, res) => {
-  // Envía el archivo 'game.html' que está en la carpeta 'views'.
-  // path.resolve se asegura de construir la ruta correctamente.
   res.sendFile(path.resolve(__dirname, '../views/game.html'));
 };

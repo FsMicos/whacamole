@@ -1,11 +1,12 @@
 // src/routes/gameRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 
-// Cuando alguien visita la página principal (ej: localhost:3000),
-// se ejecuta la función 'serveGame' del controlador.
-router.get('/', gameController.serveGame);
+// La ruta raíz '/' ahora muestra la pantalla de inicio
+router.get('/', gameController.serveHome);
+
+// La nueva ruta '/game' muestra la pantalla del juego
+router.get('/game', gameController.serveGame);
 
 module.exports = router;

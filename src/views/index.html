@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pégale al Topo - Inicio</title>
+  <!-- 1. Importar la fuente de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <!-- 2. Enlazar el archivo CSS unificado -->
+  <link rel="stylesheet" href="/css/ui-styles.css"> 
+</head>
+<body>
+  <!-- 3. Usar el contenedor wrapper para centrar el contenido -->
+  <div class="home-panel-wrapper">
+      <!-- Título con estilos de ui-panel -->
+      <div class="ui-panel title-panel">PEGALE AL TOPO</div>
+      
+      <!-- Botón de Jugar como un enlace con estilos de ui-panel -->
+      <a href="/game" class="ui-panel button-panel">▶ JUGAR</a>
+      
+      <!-- Botón de Records como un enlace con estilos de ui-panel -->
+      <a href="#" id="records-link" class="ui-panel button-panel">★ RECORDS</a>
+  </div>
+
+  <script>
+    // Script para la alerta del botón de récords
+    document.getElementById('records-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('¡La sección de récords estará disponible próximamente!');
+    });
+  </script>
+</body>
+</html>

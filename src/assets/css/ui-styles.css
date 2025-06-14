@@ -1,0 +1,161 @@
+
+:root {
+  --font-pixel: 'Press Start 2P', cursive;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* El fondo animado se aplica a ambas páginas */
+  background-image: url('/img/fondo-sprite.jpg');
+  background-size: 800% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  animation: animateFondoSprite 1s infinite steps(7);
+}
+
+@keyframes animateFondoSprite {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+
+/* 2. LAYOUT PARA CADA PÁGINA */
+
+/* Contenedor para la PÁGINA DE INICIO (index.html) */
+.home-panel-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  gap: 7vh;
+}
+
+/* Contenedor para la PÁGINA DE JUEGO (game.html) */
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 3. ESTILOS DE UI COMPARTIDOS (TÍTULOS, BOTONES) */
+.ui-panel {
+  padding: 20px 40px;
+  font-family: var(--font-pixel);
+  color: white;
+  text-align: center;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  border: 4px solid #4a2d14;
+  box-shadow: 
+    inset 0 6px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -6px 0 rgba(0, 0, 0, 0.3),
+    0 8px 0px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  transition: all 0.1s ease-in-out;
+}
+
+.ui-panel.title-panel {
+  background-color: #8c5a32;
+  font-size: 2em;
+}
+
+.ui-panel.title-panel.small {
+  font-size: 1.5em;
+  padding: 15px 30px;
+  margin-bottom: 25px;
+}
+
+.ui-panel.button-panel {
+  background-color: #f0e68c;
+  color: #5a3e2b;
+  font-size: 1.2em;
+  cursor: pointer;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  text-decoration: none; /* Para que los <a> no se subrayen */
+}
+
+.ui-panel.button-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 6px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -6px 0 rgba(0, 0, 0, 0.3),
+    0 10px 0px rgba(0, 0, 0, 0.2);
+}
+
+.ui-panel.button-panel:active {
+  transform: translateY(4px);
+  box-shadow: 
+    inset 0 6px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -6px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* 4. ESTILOS ESPECÍFICOS DEL JUEGO */
+
+/* Puntuación y tiempo */
+#game-container h2 {
+  font-family: var(--font-pixel);
+  color: #453221;
+  font-size: 1em;
+  text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.7);
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+/* Cuadrícula de agujeros */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: auto; /* Empuja el grid hacia abajo */
+  padding-bottom: 5vh;
+}
+
+/* Agujeros */
+.hole {
+  width: 170px; 
+  height: 58px;
+  position: relative;
+  overflow: hidden;
+  background-image: url('/img/agujero.png'); 
+  background-size: contain; 
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Topos */
+.mole {
+  width: 100%; 
+  height: 100%;
+  background-image: url('/img/topo-sprite.png');
+  background-size: 1020px 58px;
+  background-repeat: no-repeat;
+  background-position: center; 
+  position: absolute;
+  bottom: -100%;
+  transition: bottom 0.3s;
+}
+
+@keyframes animateMoleSprite {
+  from { background-position-x: 0; }
+  to { background-position-x: -1020px; } 
+}
+
+.hole.up .mole {
+  bottom: 0;
+  animation-name: animateMoleSprite;
+  animation-duration: 0.6s;
+  animation-iteration-count: infinite;
+  animation-timing-function: steps(6); 
+}
