@@ -7,16 +7,34 @@ html, body {
 }
 
 body {
-  /* Configuración del fondo para que ocupe toda la pantalla */
-  background-image: url('/img/fondo.jpg'); /* Ruta a tu fondo */
-  background-size: cover; /* Escala la imagen para cubrir todo el contenedor sin deformarse */
-  background-position: center; /* Centra la imagen */
-  background-repeat: no-repeat; /* Evita que la imagen se repita */
 
-  /* Usamos Flexbox para posicionar los elementos verticalmente */
+  background-image: url('/img/fondo-sprite.jpg');
+  
+  background-size: 800% 100vh;
+  
+  /* La posición inicial es el primer cuadro */
+  background-position: 0 0;
+  background-repeat: no-repeat;
+
+  /* Aplicamos la NUEVA animación de spritesheet */
+  animation: animateFondoSprite 1s infinite steps(7);
+  
+
+  /* ... El resto de tus propiedades flexbox no cambian ... */
   display: flex;
-  flex-direction: column; /* Alinea los hijos (títulos, juego) en una columna */
-  align-items: center; /* Centra todo horizontalmente */
+  flex-direction: column;
+  align-items: center;
+}
+
+/* LA NUEVA ANIMACIÓN para el spritesheet del fondo */
+@keyframes animateFondoSprite {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    /* Movemos el fondo el ancho TOTAL del spritesheet */
+    background-position: 100% 0;
+  }
 }
 
 /* === 2. TÍTULOS Y TEXTO === */
@@ -29,7 +47,7 @@ h1, h2 {
 /* === 3. CUADRÍCULA DEL JUEGO === */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   /* Usamos las dimensiones de la imagen del agujero para calcular el gap */
   gap: 30px; 
   /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
