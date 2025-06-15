@@ -14,7 +14,6 @@
     <div>
       <button class="pause-button">Pausar</button>
     </div>
-    <h2>Tu Puntuación: <span id="score">0</span></h2>
     <div id="time-container">
       <div id="time-label">
            <span id="time-left">60</span>s
@@ -24,8 +23,9 @@
           <div id="progress-fill"></div>
       </div>
     </div>
+    <h2>Puntuación:<span id="score">0</span></h2>
+    
   </header>
-  
    <div id="paused-overlay">
         <div id="alert-box-paused">
             <img src="../assets/img/clock.png" alt="Reloj" />
@@ -39,8 +39,8 @@
   <div id="save-score-overlay">
       <h2>¡Juego Terminado!</h2>
       <p>Ingresa tu nick (4 letras):</p>
-      <input type="text" id="nickname-input" maxlength="4" style="text-transform:uppercase; font-size:20px; padding:5px; text-align:center;">
-      <button id="save-score-button" style="margin-top:10px; padding:8px 16px;">Guardar Puntuación</button>
+      <input type="text" id="nickname-input" maxlength="4" >
+      <button id="save-score-button" class="ui-panel button-panel">Guardar Puntuación</button>
   </div>
 
   <div class="grid">
