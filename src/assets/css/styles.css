@@ -9,6 +9,52 @@ html, body {
   font-family: sans-serif;
   color: #333;
 }
+header {
+  display: flex; /* Alinea los elementos en una línea */
+  align-items: center; /* Centra los elementos verticalmente (opcional, pero recomendado) */
+  gap: 20px; /* Aplica una separación de 20px entre cada elemento */
+}
+#time-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+#time-label {
+  display: flex;
+  align-items: center;
+  background-color: #7c4a2b;
+  border: 2px solid #f3d179;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: #f3d179;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#time-label img {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
+
+#progress-bar {
+  width: 300px;
+  height: 24px;
+  background-color: #4a3524;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #a77d5b;
+}
+
+#progress-fill {
+  height: 100%;
+  background-color: #f3d179;
+  width: 100%;
+  transition: width 0.3s linear;
+  border-radius: 8px 0 0 8px;
+}
 
 body {
 
