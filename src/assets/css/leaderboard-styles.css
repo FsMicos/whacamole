@@ -1,0 +1,71 @@
+/* css/leaderboard-styles.css */
+
+/* Fondo opaco que se superpone al fondo animado del body */
+.leaderboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(20, 10, 0, 0.75); /* Color marrón oscuro semi-transparente */
+    z-index: 1;
+}
+
+/* Contenedor principal del contenido para que esté por encima del overlay */
+.leaderboard-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Estilos para la tabla de puntuaciones */
+.leaderboard-table {
+    width: 80%;
+    max-width: 800px;
+    border-collapse: collapse; /* Une los bordes de las celdas */
+    margin-bottom: 40px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 4px solid #4a2d14;
+    font-family: var(--font-pixel);
+    color: white;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+/* Cabecera de la tabla */
+.leaderboard-table thead {
+    background-color: #8c5a32;
+    font-size: 0.9em;
+    color: #f0e68c;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+/* Filas del cuerpo de la tabla */
+.leaderboard-table tbody tr {
+    border-bottom: 2px solid rgba(74, 45, 20, 0.5);
+    font-size: 0.8em;
+}
+
+/* Estilo para las filas pares (efecto de "cebra") */
+.leaderboard-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.leaderboard-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Estilos especiales para la primera, segunda y tercera posición */
+.leaderboard-table tbody tr:nth-child(1) td:first-child::before { content: '🥇 '; }
+.leaderboard-table tbody tr:nth-child(2) td:first-child::before { content: '🥈 '; }
+.leaderboard-table tbody tr:nth-child(3) td:first-child::before { content: '🥉 '; }

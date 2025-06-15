@@ -37,9 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNCIÓN DEL CICLO PRINCIPAL DEL JUEGO (CADA SEGUNDO) ---
     function gameTick() {
         if (juegoPausado) return;
-
         currentTime--;
-        updateTimer(); 
+        updateTimer();
 
         if (currentTime <= 0) {
             clearInterval(timerId);
@@ -47,13 +46,73 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.pause();
             gameInProgress = false;
 
-            const tasaFinal = totalMoles > 0 ? (successfulHits / totalMoles * 100).toFixed(1) : 0;
-            const promedioReaccion = reactionTimes.length > 0 ? (reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0) : 0;
-
-            alert(`¡Juego Terminado! 🎉\n\n🎯 Puntuación: ${score}\n🔥Aciertos ${successfulHits}\n🔥fallas ${missedMoles} \n📊 Tasa de éxito: ${tasaFinal}%\n⏱️ Tiempo promedio: ${promedioReaccion}ms`);
-            volverAlInicio();
+            
+            showSaveScoreForm();
         }
     }
+    //guardar 
+    function showSaveScoreForm() {
+        // Calcula las estadísticas finales una sola vez
+        const tasaFinal = totalMoles > 0 ? parseFloat((successfulHits / totalMoles * 100).toFixed(1)) : 0;
+        const promedioReaccion = reactionTimes.length > 0 ? parseInt((reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0)) : 0;
+
+        // Muestra el formulario
+        const overlay = document.getElementById('save-score-overlay');
+        overlay.style.display = 'flex';
+
+        const saveButton = document.getElementById('save-score-button');
+        const nicknameInput = document.getElementById('nickname-input');
+
+        // Usamos .onclick para asegurarnos de que solo haya un listener
+        saveButton.onclick = () => {
+            const nickname = nicknameInput.value.toUpperCase();
+            if (nickname.length === 4) {
+                const gameData = {
+                    nickname: nickname,
+                    score: score,
+                    successfulHits: successfulHits,
+                    missedMoles: missedMoles,
+                    successRate: tasaFinal,
+                    avgReactionTime: promedioReaccion
+                };
+                
+                // Llama a la función que envía los datos al servidor
+                saveScoreToServer(gameData);
+                overlay.style.display = 'none'; // Oculta el formulario
+            } else {
+                alert('¡Tu nick debe tener exactamente 4 caracteres!');
+            }
+        };
+    }
+    // los datos adquiridos los guarda en el servidor (database)
+    async function saveScoreToServer(data) {
+        try {
+            const response = await fetch('/api/scores', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('La respuesta del servidor no fue OK');
+            }
+
+            const result = await response.json();
+            console.log('Puntuación guardada:', result);
+            
+            // Ahora sí, mostramos la alerta final y volvemos al inicio
+            alert(`¡Puntuación guardada para ${data.nickname}!\n\n🎯 Puntuación: ${data.score}\n🔥 Aciertos: ${data.successfulHits}\n💀 Fallos: ${data.missedMoles}`);
+            volverAlInicio();
+
+        } catch (error) {
+            console.error('Error al enviar la puntuación:', error);
+            alert('No se pudo guardar la puntuación. Revisa la consola del servidor.');
+            volverAlInicio(); // Igualmente volvemos al inicio
+        }
+    }   
+
 
     // --- FUNCIONES DE PAUSA / REANUDAR (LÓGICA SIMPLIFICADA) ---
     function pausarJuego() {

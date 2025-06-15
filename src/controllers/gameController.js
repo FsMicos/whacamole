@@ -9,3 +9,6 @@ exports.serveHome = (req, res) => {
 exports.serveGame = (req, res) => {
   res.sendFile(path.resolve(__dirname, '../views/game.html'));
 };
+exports.serveLeaderboard = (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../views/leaderboard.html'));
+};

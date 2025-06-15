@@ -1,20 +1,26 @@
-
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
+const sequelize = require('./database'); // Tu conexión a la DB
 const app = express();
-const PORT = 3000; // El puerto donde correrá tu servidor
+const PORT = 3000;
 
-// 1. Servir archivos estáticos (CSS, JS del cliente, imágenes)
-// Le decimos a Express que la carpeta 'assets' contiene archivos públicos.
+// --- Middleware ---
+app.use(cors()); 
+app.use(express.json()); 
 app.use(express.static(path.join(__dirname, 'assets')));
-
-// 2. Definir las rutas de la aplicación
-// (Este código es un borrador, lo crearemos en el siguiente paso)
 const gameRoutes = require('./routes/gameRoutes');
 app.use('/', gameRoutes);
-
-
-// 3. Iniciar el servidor
-app.listen(PORT, () => {
-  console.log(`¡Servidor corriendo en http://localhost:${PORT}!`);
-});
+// El servidor SOLO se inicia DESPUÉS de conectar a la base de datos.
+sequelize.sync()
+    .then(() => {
+        console.log('Base de datos y tablas sincronizadas correctamente.');
+        
+        // El app.listen() va DENTRO del .then()
+        app.listen(PORT, () => {
+            console.log(`¡Servidor corriendo en http://localhost:${PORT}!`);
+        });
+    })
+    .catch(error => {
+        console.error('Error: No se pudo conectar a la base de datos:', error);
+    });
