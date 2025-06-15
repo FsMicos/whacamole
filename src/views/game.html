@@ -5,13 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>¡Pégale al Topo!</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <h1>¡Pégale al Topo!</h1>
-  <h2>Tu Puntuación: <span id="score">0</span></h2>
-  <h2>Tiempo Restante: <span id="time-left">60</span></h2>
-
+  <header>
+    <h1>¡Pégale al Topo!</h1>
+    <h2>Tu Puntuación: <span id="score">0</span></h2>
+    <h2>Tiempo Restante: <span id="time-left">60</span></h2>
+    <div>
+      <button class="pause-button">Pausar</button>
+    </div>
+  </header>
+  
+   <div id="paused-overlay">
+        <div id="alert-box-paused">
+            <img src="../assets/img/clock.png" alt="Reloj" />
+            <div class="ui-panel title-panel">PAUSA</div>
+            <button class="resume-button ui-panel button-panel">Continuar</button>
+            <button class="restart-button ui-panel button-panel">Reiniciar</button>
+            <button class="return-button ui-panel button-panel">Volver al Inicio</button>
+        </div>
+    </div>
   <div class="grid">
     <div class="hole"><div class="mole normal"></div></div>
     <div class="hole"><div class="mole normal"></div></div>
