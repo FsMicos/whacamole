@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- VARIABLES DE ESTADO DEL JUEGO ---
     let currentTime = totalTime;
-    let score, moleInterval, totalMoles, successfulHits, reactionTimes, molePosition, consecutiveMisses, consecutiveHits, moleStartTime;
+    let score, moleInterval, totalMoles, successfulHits, reactionTimes, molePosition, consecutiveMisses, missedMoles,consecutiveHits, moleStartTime;
     let timerId = null;
     let moleTimerId = null;
     let gameInProgress = false;
     let juegoPausado = false;
+    
 
     // --- FUNCIÓN CENTRALIZADA PARA ACTUALIZAR TIEMPO Y BARRA ---
     function updateTimer() {
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (juegoPausado) return;
 
         currentTime--;
-        updateTimer(); // Actualiza tanto el texto como la barra de progreso
+        updateTimer(); 
 
         if (currentTime <= 0) {
             clearInterval(timerId);
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tasaFinal = totalMoles > 0 ? (successfulHits / totalMoles * 100).toFixed(1) : 0;
             const promedioReaccion = reactionTimes.length > 0 ? (reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0) : 0;
 
-            alert(`¡Juego Terminado! 🎉\n\n🎯 Puntuación: ${score}\n📊 Tasa de éxito: ${tasaFinal}%\n⏱️ Tiempo promedio: ${promedioReaccion}ms`);
+            alert(`¡Juego Terminado! 🎉\n\n🎯 Puntuación: ${score}\n🔥Aciertos ${successfulHits}\n🔥fallas ${missedMoles} \n📊 Tasa de éxito: ${tasaFinal}%\n⏱️ Tiempo promedio: ${promedioReaccion}ms`);
             volverAlInicio();
         }
     }
@@ -102,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (molePosition && molePosition.classList.contains('up')) {
             molePosition.classList.remove('up');
+            missedMoles++;
             consecutiveMisses++;
             consecutiveHits = 0;
         }
@@ -138,14 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             hole.classList.remove('up');
             
-            score++;
+            const reactionTime = Date.now() - moleStartTime;
+            reactionTimes.push(reactionTime);
+
+            //premiar la reaccion rapida
+            const puntosGanados = Math.max(1, Math.round(1000 / reactionTime));
+            score += puntosGanados;
             successfulHits++;
             consecutiveHits++;
             consecutiveMisses = 0;
             scoreBoard.textContent = score;
 
-            const reactionTime = Date.now() - moleStartTime;
-            reactionTimes.push(reactionTime);
 
             console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
 
@@ -202,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;
         currentTime = totalTime;
         moleInterval = 3000;
+        missedMoles = 0;
         totalMoles = 0;
         successfulHits = 0;
         reactionTimes = [];

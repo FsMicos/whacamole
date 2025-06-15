@@ -15,47 +15,60 @@ header {
   gap: 20px; /* Aplica una separación de 20px entre cada elemento */
 }
 #time-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Un poco más de espacio */
+    margin: 10px 0;
+    font-family: 'Press Start 2P', cursive; 
+    border-radius: 12px;
+    
 }
 
-#time-label {
-  display: flex;
-  align-items: center;
-  background-color: #7c4a2b;
-  border: 2px solid #f3d179;
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: #f3d179;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-#time-label img {
-  width: 18px;
-  height: 18px;
-  margin-right: 6px;
-}
-
+/* El marco de la barra de progreso */
 #progress-bar {
-  width: 300px;
-  height: 24px;
-  background-color: #4a3524;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 2px solid #a77d5b;
+    width: 300px;
+    height: 28px;
+    /* Efecto de borde "hundido" típico de la era 8-bit */
+    border: 3px solid #222;
+    background-color: #8c5a32; /* Un fondo oscuro para el contenedor */
+    box-shadow: 4px 4px 0px #000; /* Sombra dura, no difuminada */
+    border-radius: 0; /* ¡Sin bordes redondeados! */
+    box-sizing: border-box; /* Asegura que el borde no añada tamaño extra */
+    padding: 2px; /* Un pequeño espacio interno */
+    
 }
 
+/* El relleno de la barra, aquí ocurre la magia */
 #progress-fill {
-  height: 100%;
-  background-color: #f3d179;
-  width: 100%;
-  transition: width 0.3s linear;
-  border-radius: 8px 0 0 8px;
+    height: 100%;
+    width: 100%; /* Inicia al 100% */
+    border-radius: 12px;
+    background-color: #f0e68c; /* Un verde brillante tipo Game Boy */
+    border-radius: 0; /* Sin bordes redondeados */
+    transition: width 0.2s linear; /* Una transición rápida y sin suavizado */
+    image-rendering: pixelated; /* Ayuda a que los bordes se vean nítidos */
+
+    /* EFECTO SCANLINES: Una capa de gradiente sobre el color de fondo */
+    background-image: repeating-linear-gradient(
+        0deg, /* Dirección de las líneas (0deg = horizontales) */
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0.2) 1px,
+        transparent 1px,
+        transparent 3px
+    );
 }
 
+/* Opcional pero recomendado: Aplica la fuente pixelada al texto del tiempo */
+#time-label {
+    background-color: #8c5a32;
+    border: 3px solid #222;
+    padding: 5px 10px;
+    color: #f0e68c;
+    font-size: 16px;
+    box-shadow: 4px 4px 0px #000;
+    border-radius: 12px;
+    padding: 12px;
+}
 body {
 
   background-image: url('/img/fondo-sprite.jpg');
