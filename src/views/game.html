@@ -34,13 +34,39 @@
             <button class="restart-button ui-panel button-panel">Reiniciar</button>
             <button class="return-button ui-panel button-panel">Volver al Inicio</button>
         </div>
-  </div>
-  <!-- FORMULARIO DE GUARDAR PUNTUACIÓN -->
+  </div>  <!-- FORMULARIO DE GUARDAR PUNTUACIÓN -->
   <div id="save-score-overlay">
       <h2>¡Juego Terminado!</h2>
       <p>Ingresa tu nick (4 letras):</p>
       <input type="text" id="nickname-input" maxlength="4" >
       <button id="save-score-button" class="ui-panel button-panel">Guardar Puntuación</button>
+  </div>
+
+  <!-- PANTALLA FINAL DE PARTIDA -->
+  <div id="game-over-overlay">
+        <div id="alert-box-game-over">
+            <div class="ui-panel title-panel">FINAL PARTIDA</div>
+            
+            <div class="stats-container">
+                <div class="stat-bubble" id="points-bubble">
+                    <div class="stat-label">Puntos</div>
+                    <div class="stat-value" id="final-points">0</div>
+                </div>
+                <div class="stat-bubble" id="hits-bubble">
+                    <div class="stat-label">Aciertos</div>
+                    <div class="stat-value" id="final-hits">0</div>
+                </div>
+                <div class="stat-bubble" id="misses-bubble">
+                    <div class="stat-label">Fallos</div>
+                    <div class="stat-value" id="final-misses">0</div>
+                </div>
+            </div>
+
+            <div class="final-buttons-container">
+                <button class="game-over-restart-button ui-panel button-panel">🔄 REINICIAR</button>
+                <button class="game-over-home-button ui-panel button-panel">🏠 INICIO</button>
+            </div>
+        </div>
   </div>
 
   <div class="grid">

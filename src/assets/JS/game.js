@@ -83,8 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('¡Tu nick debe tener exactamente 4 caracteres!');
             }
         };
-    }
-    // los datos adquiridos los guarda en el servidor (database)
+    }    // los datos adquiridos los guarda en el servidor (database)
     async function saveScoreToServer(data) {
         try {
             const response = await fetch('/api/scores', {
@@ -102,16 +101,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             console.log('Puntuación guardada:', result);
             
-            // Ahora sí, mostramos la alerta final y volvemos al inicio
-            alert(`¡Puntuación guardada para ${data.nickname}!\n\n🎯 Puntuación: ${data.score}\n🔥 Aciertos: ${data.successfulHits}\n💀 Fallos: ${data.missedMoles}`);
-            volverAlInicio();
+            // Mostrar la pantalla de final de partida en lugar del alert
+            showGameOverScreen();
 
         } catch (error) {
             console.error('Error al enviar la puntuación:', error);
             alert('No se pudo guardar la puntuación. Revisa la consola del servidor.');
-            volverAlInicio(); // Igualmente volvemos al inicio
+            showGameOverScreen(); // Igualmente mostramos la pantalla final
         }
-    }   
+    }
+
+    // Función para mostrar la pantalla final de partida
+    function showGameOverScreen() {
+        // Actualizar las estadísticas en la pantalla
+        document.getElementById('final-points').textContent = score;
+        document.getElementById('final-hits').textContent = successfulHits;
+        document.getElementById('final-misses').textContent = missedMoles;
+        
+        // Mostrar el overlay
+        const gameOverOverlay = document.getElementById('game-over-overlay');
+        gameOverOverlay.style.display = 'flex';
+    }
 
 
     // --- FUNCIONES DE PAUSA / REANUDAR (LÓGICA SIMPLIFICADA) ---
@@ -148,13 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function volverAlInicio() {
         window.location.href = '/'; // O la ruta correcta a tu index.html
-    }
-
-    // --- ASIGNAR EVENTO A BOTONES ---
+    }    // --- ASIGNAR EVENTO A BOTONES ---
     document.querySelector(".pause-button").addEventListener("click", pausarJuego);
     document.querySelector(".resume-button").addEventListener("click", reanudarJuego);
     document.querySelector(".restart-button").addEventListener("click", reiniciarJuego);
     document.querySelector(".return-button").addEventListener("click", volverAlInicio);
+    
+    // Botones de la pantalla de final de partida
+    document.querySelector(".game-over-restart-button").addEventListener("click", () => {
+        document.getElementById("game-over-overlay").style.display = "none";
+        reiniciarJuego();
+    });
+    document.querySelector(".game-over-home-button").addEventListener("click", volverAlInicio);
 
     // --- LÓGICA DEL JUEGO ---
     function randomMole() {
@@ -287,8 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         randomMole(); // Muestra el primer topo inmediatamente
         moleTimerId = setInterval(randomMole, moleInterval);
         timerId = setInterval(gameTick, 1000); // CORREGIDO: Usa la función centralizada
-    }
-
-    // Inicia el juego cuando la página carga
+    }    // Inicia el juego cuando la página carga
     startGame();
 });
