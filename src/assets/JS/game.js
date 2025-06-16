@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         randomMole();
         moleTimerId = setInterval(randomMole, moleInterval);
         timerId = setInterval(gameTick, 1000);
-    }
+    }git checkout -b Controles_Botones
     
     startGame();
 });
