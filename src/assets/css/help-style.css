@@ -1,0 +1,34 @@
+.help-button {
+      position: fixed; /* Lo fija en la pantalla, independientemente del scroll */
+      bottom: 2rem;    /* 2rem desde abajo */
+      right: 2rem;     /* 2rem desde la derecha */
+      
+      /* Estilos para que se vea como un botón del juego */
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      /* He intentado replicar el estilo de tus otros botones */
+      background-color: #8c5a32; /* Color base, similar a los otros botones */
+      border: 4px solid #301c0a; /* Borde oscuro */
+      border-radius: 8px; /* Bordes ligeramente redondeados */
+      box-shadow: 0 6px 0 #301c0a; /* Sombra para efecto 3D/pixel */
+      
+      color: #ffffff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 28px;
+      text-decoration: none;
+      transition: all 0.1s ease-out;
+    }
+
+    .help-button:hover {
+      background-color: #c9997e; /* Un poco más claro al pasar el ratón */
+      cursor: pointer;
+    }
+
+    .help-button:active {
+      transform: translateY(4px); /* Efecto de ser presionado */
+      box-shadow: 0 2px 0 #8a624a;
+    }

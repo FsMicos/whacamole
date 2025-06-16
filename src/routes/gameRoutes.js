@@ -9,6 +9,7 @@ router.get('/', gameController.serveHome);
 // La nueva ruta '/game' muestra la pantalla del juego
 router.get('/game', gameController.serveGame);
 router.get('/leaderboard', gameController.serveLeaderboard);
+router.get('/help', gameController.serveHelp);
 
 router.post('/api/scores', async (req, res) => {
     try {

@@ -12,3 +12,6 @@ exports.serveGame = (req, res) => {
 exports.serveLeaderboard = (req, res) => {
   res.sendFile(path.resolve(__dirname, '../views/leaderboard.html'));
 };
+exports.serveHelp = (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../views/help.html'));
+};

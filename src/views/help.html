@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pégale al Topo - Ayuda</title>
+    
+    <!-- Fuentes y estilos globales -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/ui-styles.css"> 
+
+    <!-- Estilos específicos para la página de ayuda -->
+    <style>
+        /* Capa oscura semitransparente, como en la tabla de records */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(20, 10, 0, 0.75);
+            z-index: 1;
+        }
+
+        /* Contenedor para centrar el contenido vertical y horizontalmente */
+        .help-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* El panel principal con las instrucciones */
+        .help-panel {
+            width: 100%;
+            max-width: 700px; /* Ancho máximo para el texto */
+            padding: 2.5rem;
+            margin-bottom: 3rem; /* Espacio entre el panel y el botón de volver */
+            
+            /* Colores tomados del botón de ayuda */
+            background-color: #b9896e;
+            border: 4px solid #4e342e;
+            border-radius: 8px;
+            box-shadow: 0 8px 0 #8a624a; /* Sombra un poco más grande */
+            
+            /* Estilos del texto */
+            color: #ffffff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px; /* Tamaño de fuente legible */
+            line-height: 1.8;  /* Espaciado entre líneas para mejor lectura */
+            text-align: center;
+        }
+
+        /* Ajustes para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .help-panel {
+                padding: 1.5rem;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- La capa oscura que cubre el fondo original -->
+    <div class="help-overlay"></div>
+
+    <!-- El contenedor que centra el contenido -->
+    <div class="help-container">
+        
+        <!-- El panel con el texto de ayuda -->
+        <div class="help-panel">
+            <p>
+                Los jugadores deben golpear topos que aparecen aleatoriamente en agujeros en el suelo. El objetivo es golpear tantos topos como sea posible antes de que se acabe el tiempo, ganando puntos por cada golpe exitoso y mucho más si reaccionas rápido.
+            </p>
+        </div>
+
+        <!-- Botón para volver al inicio, reutilizando estilos existentes -->
+        <a href="/" class="ui-panel button-panel">⮌ VOLVER</a>
+
+    </div>
+</body>
+</html>
