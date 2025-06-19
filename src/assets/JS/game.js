@@ -247,13 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasaAciertos = successfulHits / totalMoles;
         let nuevoIntervalo = moleInterval;
 
-        if (consecutiveHits >= 5) {
+        if (consecutiveHits >= 3) {
             nuevoIntervalo = Math.max(400, moleInterval - 600);
-            console.log(`🔥 5+ aciertos consecutivos! Aumentando velocidad a ${nuevoIntervalo}ms`);
+            console.log(`🔥 3+ aciertos consecutivos! Aumentando velocidad a ${nuevoIntervalo}ms`);
         } else if (tasaAciertos >= 0.7) {
             nuevoIntervalo = Math.max(800, moleInterval - 300);
             console.log(`🚀 Buen rendimiento! Acelerando a ${nuevoIntervalo}ms`);
-        } else if (tasaAciertos < 0.4) {
+        } else if (tasaAciertos <= 0.4) {
             nuevoIntervalo = Math.min(4000, moleInterval + 500);
             console.log(`📉 Rendimiento bajo! Desacelerando a ${nuevoIntervalo}ms`);
         }
