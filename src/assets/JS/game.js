@@ -142,8 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('¡Tu nick debe tener exactamente 4 caracteres!');
             }
         };
-    }
-
+    }    // los datos adquiridos los guarda en el servidor (database)
     async function saveScoreToServer(data) {
         try {
             const response = await fetch('/api/scores', {
@@ -154,14 +153,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('La respuesta del servidor no fue OK');
             const result = await response.json();
             console.log('Puntuación guardada:', result);
-            alert(`¡Puntuación guardada para ${data.nickname}!\n\n🎯 Puntuación: ${data.score}\n🔥 Aciertos: ${data.successfulHits}\n💀 Fallos: ${data.missedMoles}`);
-            volverAlInicio();
+            
+            // Mostrar la pantalla de final de partida en lugar del alert
+            showGameOverScreen();
+
         } catch (error) {
             console.error('Error al enviar la puntuación:', error);
             alert('No se pudo guardar la puntuación. Revisa la consola del servidor.');
-            volverAlInicio();
+            showGameOverScreen(); // Igualmente mostramos la pantalla final
         }
-    }   
+    }
+
+    // Función para mostrar la pantalla final de partida
+    function showGameOverScreen() {
+        // Actualizar las estadísticas en la pantalla
+        document.getElementById('final-points').textContent = score;
+        document.getElementById('final-hits').textContent = successfulHits;
+        document.getElementById('final-misses').textContent = missedMoles;
+        
+        // Mostrar el overlay
+        const gameOverOverlay = document.getElementById('game-over-overlay');
+        gameOverOverlay.style.display = 'flex';
+    }
 
     function pausarJuego() {
         if (!gameInProgress || juegoPausado) return;
@@ -190,13 +203,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function volverAlInicio() {
-        window.location.href = '/';
-    }
-
+        window.location.href = '/'; // O la ruta correcta a tu index.html
+    }    // --- ASIGNAR EVENTO A BOTONES ---
     document.querySelector(".pause-button").addEventListener("click", pausarJuego);
     document.querySelector(".resume-button").addEventListener("click", reanudarJuego);
     document.querySelector(".restart-button").addEventListener("click", reiniciarJuego);
     document.querySelector(".return-button").addEventListener("click", volverAlInicio);
+    
+    // Botones de la pantalla de final de partida
+    document.querySelector(".game-over-restart-button").addEventListener("click", () => {
+        document.getElementById("game-over-overlay").style.display = "none";
+        reiniciarJuego();
+    });
+    document.querySelector(".game-over-home-button").addEventListener("click", volverAlInicio);
 
     function randomMole() {
         if (!gameInProgress || juegoPausado) return;
@@ -225,11 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalMoles < 1) return;
         const tasaAciertos = successfulHits / totalMoles;
         let nuevoIntervalo = moleInterval;
-        if (consecutiveHits >= 5) {
+
+        if (consecutiveHits >= 3) {
             nuevoIntervalo = Math.max(400, moleInterval - 600);
+            console.log(`🔥 3+ aciertos consecutivos! Aumentando velocidad a ${nuevoIntervalo}ms`);
         } else if (tasaAciertos >= 0.7) {
             nuevoIntervalo = Math.max(800, moleInterval - 300);
-        } else if (tasaAciertos < 0.4) {
+            console.log(`🚀 Buen rendimiento! Acelerando a ${nuevoIntervalo}ms`);
+        } else if (tasaAciertos <= 0.4) {
             nuevoIntervalo = Math.min(4000, moleInterval + 500);
         }
         if (Math.abs(nuevoIntervalo - moleInterval) >= 100) {
@@ -266,8 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         randomMole();
         moleTimerId = setInterval(randomMole, moleInterval);
-        timerId = setInterval(gameTick, 1000);
-    }git checkout -b Controles_Botones
-    
+        timerId = setInterval(gameTick, 1000); // CORREGIDO: Usa la función centralizada
+    }    // Inicia el juego cuando la página carga
     startGame();
 });

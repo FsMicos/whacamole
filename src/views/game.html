@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,38 +10,131 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <header>
     <div>
-      <button class="pause-button">Pausar</button>
+      <button class="pause-button"> <svg width="24" height="23" viewBox="0 0 24 23" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_129_3)">
+            <path
+              d="M8.4 0H1.2C0.537258 0 0 0.361314 0 0.807018V21.7895C0 22.2352 0.537258 22.5965 1.2 22.5965H8.4C9.06274 22.5965 9.6 22.2352 9.6 21.7895V0.807018C9.6 0.361314 9.06274 0 8.4 0Z"
+              fill="#5A3E2B" />
+            <path
+              d="M22.7999 0H15.5999C14.9372 0 14.3999 0.361314 14.3999 0.807018V21.7895C14.3999 22.2352 14.9372 22.5965 15.5999 22.5965H22.7999C23.4626 22.5965 23.9999 22.2352 23.9999 21.7895V0.807018C23.9999 0.361314 23.4626 0 22.7999 0Z"
+              fill="#5A3E2B" />
+          </g>
+          <defs>
+            <clipPath id="clip0_129_3">
+              <rect width="24" height="23" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      </button>
     </div>
     <div id="time-container">
       <div id="time-label">
-           <span id="time-left">60</span>s
+        <span id="time-left">60</span>s
       </div>
 
       <div id="progress-bar">
-          <div id="progress-fill"></div>
+        <div id="progress-fill"></div>
       </div>
     </div>
     <h2>Puntuación:<span id="score">0</span></h2>
-    
+
   </header>
-   <div id="paused-overlay">
-        <div id="alert-box-paused">
-            <img src="../assets/img/clock.png" alt="Reloj" />
-            <div class="ui-panel title-panel">PAUSA</div>
-            <button class="resume-button ui-panel button-panel">Continuar</button>
-            <button class="restart-button ui-panel button-panel">Reiniciar</button>
-            <button class="return-button ui-panel button-panel">Volver al Inicio</button>
-        </div>
-  </div>
-  <!-- FORMULARIO DE GUARDAR PUNTUACIÓN -->
+  <div id="paused-overlay">
+    <div id="alert-box-paused">
+      
+      <div class="ui-panel title-panel">PAUSA 
+      </div>
+      <button class="resume-button ui-panel button-panel"> <svg width="30" height="28" viewBox="0 0 30 28" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_123_41)">
+            <path
+              d="M27.8484 10.9538C30.7172 12.5163 30.7172 15.4851 27.8484 17.0476L9.32379 27.1371C5.56732 29.1831 -1.51279e-07 27.3638 0 24.0902L9.32554e-07 3.91117C1.08384e-06 0.637638 5.56732 -1.18167 9.32379 0.864303L27.8484 10.9538Z"
+              fill="#5A3E2B" />
+          </g>
+          <defs>
+            <clipPath id="clip0_123_41">
+              <rect width="30" height="28" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+        Continuar</button>
+      <button class="restart-button ui-panel button-panel"><svg width="36" height="32" viewBox="0 0 36 32" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_123_30)">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M32.2534 16.2812C32.2534 16.2812 28.878 16.0005 28.2619 18.1181C27.6881 22.1803 23.3242 25.3389 18.0261 25.3389C12.3372 25.3389 7.725 21.6971 7.725 17.2051C7.725 13.4584 11.8319 11.0141 16.4974 10.3066C17.2901 10.1862 18.0261 10.6668 18.0261 11.3039V13.222C18.0261 14.0429 19.1977 14.5244 20.0492 14.0533L30.3535 8.35846C30.6976 8.16758 30.9022 7.85808 30.9022 7.52623C30.9022 7.21841 30.7248 6.92615 30.4199 6.73353L20.1155 0.224536C19.2728 -0.307637 18.0261 0.166074 18.0261 1.01721V3.09861C18.0261 3.61445 17.5373 4.05034 16.8872 4.10708C7.8894 4.89459 0 9.98765 0 17.2051C0 25.0664 8.07015 31.4396 18.0261 31.4396C27.5161 31.4396 35.2934 25.6484 36 18.2978C36 17.1233 34.5036 16.2812 32.2534 16.2812Z"
+              fill="#5A3E2B" />
+          </g>
+          <defs>
+            <clipPath id="clip0_123_30">
+              <rect width="36" height="32" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+        Reiniciar</button>
+      <button class="return-button ui-panel button-panel"> <svg width="56" height="57" viewBox="0 0 56 57" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M44.2442 21.3962L25.4908 1.98942L24.3232 0.781748C24.0838 0.533923 23.7996 0.33732 23.4868 0.203181C23.174 0.0690431 22.8386 0 22.5 0C22.1614 0 21.826 0.0690431 21.5132 0.203181C21.2004 0.33732 20.9162 0.533923 20.6769 0.781748L19.5092 1.98942L0.755812 21.3962C0.516209 21.6437 0.326129 21.9377 0.19644 22.2613C0.0667525 22.5849 0 22.9317 0 23.282C0 23.6323 0.0667525 23.9791 0.19644 24.3027C0.326129 24.6263 0.516209 24.9202 0.755812 25.1678L1.91384 26.3754C2.15317 26.6232 2.43737 26.8198 2.75021 26.9539C3.06305 27.0881 3.39838 27.1572 3.73702 27.1572C4.07567 27.1572 4.411 27.0881 4.72384 26.9539C5.03668 26.8198 5.32088 26.6232 5.56021 26.3754L7.74706 24.1135V44.4335C7.74706 44.6394 7.78632 44.8433 7.86258 45.0335C7.93884 45.2238 8.05058 45.3966 8.19153 45.5421C8.33239 45.6875 8.49962 45.8029 8.68363 45.8815C8.86773 45.9601 9.06493 46.0003 9.26397 46H35.4321C35.6312 46.0003 35.8282 45.96 36.0121 45.8814C36.196 45.8028 36.3631 45.6874 36.5038 45.5419C36.6445 45.3964 36.756 45.2236 36.832 45.0333C36.908 44.8432 36.947 44.6393 36.9467 44.4335V23.8091L39.4278 26.3754C39.9119 26.8754 40.5681 27.1563 41.2522 27.1563C41.9364 27.1563 42.5925 26.8754 43.0766 26.3754L44.2442 25.1678C44.4838 24.9202 44.6739 24.6263 44.8035 24.3027C44.9332 23.9791 45 23.6323 45 23.282C45 22.9317 44.9332 22.5849 44.8035 22.2613C44.6739 21.9377 44.4838 21.6437 44.2442 21.3962Z"
+            fill="#5A3E2B" />
+        </svg>
+        Volver al Inicio</button>
+    </div>
+  </div> <!-- FORMULARIO DE GUARDAR PUNTUACIÓN -->
   <div id="save-score-overlay">
-      <h2>¡Juego Terminado!</h2>
-      <p>Ingresa tu nick (4 letras):</p>
-      <input type="text" id="nickname-input" maxlength="4" >
-      <button id="save-score-button" class="ui-panel button-panel">Guardar Puntuación</button>
+    <h2>¡Juego Terminado!</h2>
+    <p>Ingresa tu nick (4 letras):</p>
+    <input type="text" id="nickname-input" maxlength="4">
+    <button id="save-score-button" class="ui-panel button-panel">Guardar Puntuación</button>
+  </div>
+
+  <!-- PANTALLA FINAL DE PARTIDA -->
+  <div id="game-over-overlay">
+    <div id="alert-box-game-over">
+      <div class="ui-panel title-panel">FINAL PARTIDA</div>
+
+      <div class="stats-container">
+        <div class="stat-bubble" id="points-bubble">
+          <div class="stat-label">Puntos</div>
+          <div class="stat-value" id="final-points">0</div>
+        </div>
+        <div class="stat-bubble" id="hits-bubble">
+          <div class="stat-label">Aciertos</div>
+          <div class="stat-value" id="final-hits">0</div>
+        </div>
+        <div class="stat-bubble" id="misses-bubble">
+          <div class="stat-label">Fallos</div>
+          <div class="stat-value" id="final-misses">0</div>
+        </div>
+      </div>
+
+      <div class="final-buttons-container">
+        <button class="game-over-restart-button ui-panel button-panel"> <svg width="36" height="32" viewBox="0 0 36 32" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_123_30)">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M32.2534 16.2812C32.2534 16.2812 28.878 16.0005 28.2619 18.1181C27.6881 22.1803 23.3242 25.3389 18.0261 25.3389C12.3372 25.3389 7.725 21.6971 7.725 17.2051C7.725 13.4584 11.8319 11.0141 16.4974 10.3066C17.2901 10.1862 18.0261 10.6668 18.0261 11.3039V13.222C18.0261 14.0429 19.1977 14.5244 20.0492 14.0533L30.3535 8.35846C30.6976 8.16758 30.9022 7.85808 30.9022 7.52623C30.9022 7.21841 30.7248 6.92615 30.4199 6.73353L20.1155 0.224536C19.2728 -0.307637 18.0261 0.166074 18.0261 1.01721V3.09861C18.0261 3.61445 17.5373 4.05034 16.8872 4.10708C7.8894 4.89459 0 9.98765 0 17.2051C0 25.0664 8.07015 31.4396 18.0261 31.4396C27.5161 31.4396 35.2934 25.6484 36 18.2978C36 17.1233 34.5036 16.2812 32.2534 16.2812Z"
+              fill="#5A3E2B" />
+          </g>
+          <defs>
+            <clipPath id="clip0_123_30">
+              <rect width="36" height="32" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>REINICIAR</button>
+        <button class="game-over-home-button ui-panel button-panel"><svg width="56" height="57" viewBox="0 0 56 57" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M44.2442 21.3962L25.4908 1.98942L24.3232 0.781748C24.0838 0.533923 23.7996 0.33732 23.4868 0.203181C23.174 0.0690431 22.8386 0 22.5 0C22.1614 0 21.826 0.0690431 21.5132 0.203181C21.2004 0.33732 20.9162 0.533923 20.6769 0.781748L19.5092 1.98942L0.755812 21.3962C0.516209 21.6437 0.326129 21.9377 0.19644 22.2613C0.0667525 22.5849 0 22.9317 0 23.282C0 23.6323 0.0667525 23.9791 0.19644 24.3027C0.326129 24.6263 0.516209 24.9202 0.755812 25.1678L1.91384 26.3754C2.15317 26.6232 2.43737 26.8198 2.75021 26.9539C3.06305 27.0881 3.39838 27.1572 3.73702 27.1572C4.07567 27.1572 4.411 27.0881 4.72384 26.9539C5.03668 26.8198 5.32088 26.6232 5.56021 26.3754L7.74706 24.1135V44.4335C7.74706 44.6394 7.78632 44.8433 7.86258 45.0335C7.93884 45.2238 8.05058 45.3966 8.19153 45.5421C8.33239 45.6875 8.49962 45.8029 8.68363 45.8815C8.86773 45.9601 9.06493 46.0003 9.26397 46H35.4321C35.6312 46.0003 35.8282 45.96 36.0121 45.8814C36.196 45.8028 36.3631 45.6874 36.5038 45.5419C36.6445 45.3964 36.756 45.2236 36.832 45.0333C36.908 44.8432 36.947 44.6393 36.9467 44.4335V23.8091L39.4278 26.3754C39.9119 26.8754 40.5681 27.1563 41.2522 27.1563C41.9364 27.1563 42.5925 26.8754 43.0766 26.3754L44.2442 25.1678C44.4838 24.9202 44.6739 24.6263 44.8035 24.3027C44.9332 23.9791 45 23.6323 45 23.282C45 22.9317 44.9332 22.5849 44.8035 22.2613C44.6739 21.9377 44.4838 21.6437 44.2442 21.3962Z"
+            fill="#5A3E2B" />
+        </svg> INICIO</button>
+      </div>
+    </div>
   </div>
 
   <div class="grid">
@@ -56,4 +150,5 @@
 
   <script src="/JS/game.js"></script>
 </body>
+
 </html>
