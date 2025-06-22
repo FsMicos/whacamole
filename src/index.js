@@ -12,7 +12,8 @@ app.use(express.static(path.join(__dirname, 'assets')));
 const gameRoutes = require('./routes/gameRoutes');
 app.use('/', gameRoutes);
 // El servidor SOLO se inicia DESPUÉS de conectar a la base de datos.
-sequelize.sync()
+// Forzamos la sincronización para recrear la tabla MLData
+sequelize.sync({ alter: true })
     .then(() => {
         console.log('Base de datos y tablas sincronizadas correctamente.');
         

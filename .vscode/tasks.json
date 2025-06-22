@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Ejecutar notebook de Whac-a-Mole ML",
+			"type": "shell",
+			"command": "jupyter notebook \"c:\\Users\\ariel.morales\\Documents\\GitHub\\whacamole\\modelo_ml_whacamole.ipynb\"",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
