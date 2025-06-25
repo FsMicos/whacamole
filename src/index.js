@@ -14,7 +14,7 @@ const PORT = 3000;
 // --- NUEVO: Configuración del puerto serial ---
 // Búscalo en el IDE de Arduino (Herramientas > Puerto) o en el Administrador de dispositivos de tu SO.
 // En Windows es 'COM3', 'COM4', etc. En macOS/Linux es '/dev/tty.usbserial-XXXX' o similar.
-const SERIAL_PORT_NAME = 'COM4'; // ¡¡¡CAMBIA ESTO POR TU PUERTO!!!
+const SERIAL_PORT_NAME = 'COM3'; // ¡¡¡CAMBIA ESTO POR TU PUERTO!!!
 app.use(cors()); 
 app.use(express.json()); 
 app.use(express.static(path.join(__dirname, 'assets')));
