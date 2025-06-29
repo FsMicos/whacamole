@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const socket = new WebSocket(`ws://${window.location.host}`);
 
     socket.onopen = () => {
-        console.log('✅ Conectado al servidor del juego vía WebSocket. ¡Control físico activado!');
+        console.log('Conectado al servidor del juego vía WebSocket. ¡Control físico activado!');
     };
 
     socket.onmessage = (event) => {
@@ -29,22 +29,100 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     socket.onclose = () => {
-        console.warn('❌ Desconectado del servidor WebSocket. El control físico no funcionará.');
+        console.warn('X Desconectado del servidor WebSocket. El control físico no funcionará.');
     };
 
     socket.onerror = (error) => {
         console.error('Error en la conexión WebSocket:', error);
     };
 
+    // --- SISTEMA DE CONTROL GLOBAL DE MÚSICA (INTEGRADO) ---
+    // Crear el sistema si no existe
+    if (!window.globalMusicControl) {
+        class GlobalMusicControl {
+            constructor() {
+                this.isMuted = localStorage.getItem('musicMuted') === 'true';
+                this.audioElements = [];
+            }
 
-    // --- CONFIGURACIÓN DE AUDIO (sin cambios) ---
+            registerAudio(audioElement, volume = 1) {
+                audioElement.defaultVolume = volume;
+                this.audioElements.push(audioElement);
+                
+                if (this.isMuted) {
+                    audioElement.volume = 0;
+                } else {
+                    audioElement.volume = volume;
+                }
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                localStorage.setItem('musicMuted', this.isMuted.toString());
+                
+                this.audioElements.forEach(audio => {
+                    if (this.isMuted) {
+                        audio.volume = 0;
+                    } else {
+                        audio.volume = audio.defaultVolume || 1;
+                    }
+                });
+                
+                this.updateButton();
+                
+                window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
+                    detail: { isMuted: this.isMuted } 
+                }));
+            }
+
+            updateButton() {
+                const button = document.getElementById('muteButton');
+                if (button) {
+                    if (this.isMuted) {
+                        button.textContent = '🔇';
+                        button.classList.add('muted');
+                    } else {
+                        button.textContent = '🔊';
+                        button.classList.remove('muted');
+                    }
+                }
+            }
+
+            setupButton() {
+                const button = document.getElementById('muteButton');
+                if (button) {
+                    this.updateButton();
+                    button.addEventListener('click', () => this.toggleMute());
+                }
+                
+                // Event listener para tecla M
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'm' || e.key === 'M') {
+                        this.toggleMute();
+                    }
+                });
+            }
+
+            isGloballyMuted() {
+                return this.isMuted;
+            }
+        }
+
+        window.globalMusicControl = new GlobalMusicControl();
+        window.globalMusicControl.setupButton();
+    }
+
+    // --- CONFIGURACIÓN DE AUDIO ---
     const hitSound = new Audio('/media/Explosion.mp3');
     hitSound.preload = 'auto';
     hitSound.volume = 0.6;
+    
     const backgroundMusic = new Audio('/media/Kubbi.mp3');
     backgroundMusic.loop = true;
     backgroundMusic.preload = 'auto';
-    backgroundMusic.volume = 0.3;
+    
+    // Registrar audio con el sistema global
+    window.globalMusicControl.registerAudio(backgroundMusic, 0.3);
     
     // --- VARIABLES DE ESTADO DEL JUEGO ---
     let currentTime = totalTime;
@@ -77,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         consecutiveMisses = 0;
         scoreBoard.textContent = score;
 
-        console.log(`✅ ¡Acierto en agujero #${holeIndex}! Tiempo: ${reactionTime}ms`);
+        console.log(` ¡Acierto en agujero #${holeIndex}! Tiempo: ${reactionTime}ms`);
 
         hitSound.currentTime = 0;
         hitSound.play().catch(e => console.log('Error reproduciendo sonido:', e));
@@ -142,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('¡Tu nick debe tener exactamente 4 caracteres!');
             }
         };
-    }    // los datos adquiridos los guarda en el servidor (database)
+    }
+
+    // los datos adquiridos los guarda en el servidor (database)
     async function saveScoreToServer(data) {
         try {
             const response = await fetch('/api/scores', {
@@ -204,7 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function volverAlInicio() {
         window.location.href = '/'; // O la ruta correcta a tu index.html
-    }    // --- ASIGNAR EVENTO A BOTONES ---
+    }
+
+    // --- ASIGNAR EVENTO A BOTONES ---
     document.querySelector(".pause-button").addEventListener("click", pausarJuego);
     document.querySelector(".resume-button").addEventListener("click", reanudarJuego);
     document.querySelector(".restart-button").addEventListener("click", reiniciarJuego);
@@ -288,7 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         randomMole();
         moleTimerId = setInterval(randomMole, moleInterval);
-        timerId = setInterval(gameTick, 1000); // CORREGIDO: Usa la función centralizada
-    }    // Inicia el juego cuando la página carga
+        timerId = setInterval(gameTick, 1000);
+    }
+
+    // Inicia el juego cuando la página carga
     startGame();
 });

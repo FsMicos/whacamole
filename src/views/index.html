@@ -12,6 +12,7 @@
   <!-- 2. Enlazar el archivo CSS unificado -->
   <link rel="stylesheet" href="/css/ui-styles.css"> 
   <link rel="stylesheet" href="/css/help-style.css"> 
+  <link rel="stylesheet" href="/css/mute-button.css">
 </head>
 <body>
   <!-- 3. Usar el contenedor wrapper para centrar el contenido -->
@@ -54,20 +55,88 @@
    <a href="/help" class="help-button">?</a>
    <button class="mute-button" id="muteButton">🔊</button>
    
-    <script>
+   <script>
+    // Sistema de control global de música integrado
+    class GlobalMusicControl {
+      constructor() {
+        this.isMuted = localStorage.getItem('musicMuted') === 'true';
+        this.audioElements = [];
+        this.defaultVolume = 1;
+      }
+
+      registerAudio(audioElement, volume = 1) {
+        audioElement.defaultVolume = volume;
+        this.audioElements.push(audioElement);
+        
+        // Aplicar estado actual
+        if (this.isMuted) {
+          audioElement.volume = 0;
+        } else {
+          audioElement.volume = volume;
+        }
+      }
+
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('musicMuted', this.isMuted.toString());
+        
+        // Actualizar todos los audios
+        this.audioElements.forEach(audio => {
+          if (this.isMuted) {
+            audio.volume = 0;
+          } else {
+            audio.volume = audio.defaultVolume || 1;
+          }
+        });
+        
+        // Actualizar botón
+        this.updateButton();
+        
+        // Notificar a otras páginas/scripts
+        window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
+          detail: { isMuted: this.isMuted } 
+        }));
+      }
+
+      updateButton() {
+        const button = document.getElementById('muteButton');
+        if (button) {
+          if (this.isMuted) {
+            button.textContent = '🔇';
+            button.classList.add('muted');
+          } else {
+            button.textContent = '🔊';
+            button.classList.remove('muted');
+          }
+        }
+      }
+
+      setupButton() {
+        const button = document.getElementById('muteButton');
+        if (button) {
+          this.updateButton();
+          button.addEventListener('click', () => this.toggleMute());
+        }
+      }
+    }
+
+    // Crear instancia global
+    window.globalMusicControl = new GlobalMusicControl();
+
     document.addEventListener('DOMContentLoaded', () => {
+      // Configurar el botón de silenciar
+      window.globalMusicControl.setupButton();
+
       // Background music setup
       const backgroundMusic = new Audio('/media/solitario.mp3');
       backgroundMusic.loop = true;
       backgroundMusic.preload = 'auto';
-      backgroundMusic.volume = 0.3;
-
-      // Try to play music when user interacts with the page (to comply with browser autoplay policies)
-      let musicStarted = false;
-      let isMuted = false;
       
-      // Referencias al botón de silenciar
-      const muteButton = document.getElementById('muteButton');
+      // Registrar audio con el sistema global
+      window.globalMusicControl.registerAudio(backgroundMusic, 1);
+
+      // Variable de control para inicio de música
+      let musicStarted = false;
       
       function startMusic() {
         if (!musicStarted) {
@@ -78,33 +147,15 @@
         }
       }
 
-      // Función para alternar silencio
-      function toggleMute() {
-        if (isMuted) {
-          backgroundMusic.volume = 0.3;
-          muteButton.textContent = '🔊';
-          muteButton.classList.remove('muted');
-          isMuted = false;
-        } else {
-          backgroundMusic.volume = 0;
-          muteButton.textContent = '🔇';
-          muteButton.classList.add('muted');
-          isMuted = true;
-        }
-      }
-
-      // Event listener para el botón de silenciar
-      muteButton.addEventListener('click', toggleMute);
-
-      // Add event listeners for user interaction
+      // Event listeners para iniciar música con interacción del usuario
       document.addEventListener('click', startMusic, { once: true });
       document.addEventListener('keydown', startMusic, { once: true });
       document.addEventListener('touchstart', startMusic, { once: true });
 
-      // Optional: Add a mute/unmute button functionality with keyboard
+      // Funcionalidad de tecla M
       document.addEventListener('keydown', (e) => {
         if (e.key === 'm' || e.key === 'M') {
-          toggleMute();
+          window.globalMusicControl.toggleMute();
         }
       });
     });

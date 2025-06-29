@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/ui-styles.css"> 
+    <script src="/js/global-music-control.js"></script>
 
     <!-- Estilos específicos para la página de ayuda -->
     <style>
@@ -24,7 +25,7 @@
             z-index: 1;
         }
 
-        /* Contenedor para centrar el contenido vertical y horizontalmente */
+        /* Contenedor para centrar el contenido vertical y horiazontalmente */
         .help-container {
             position: relative;
             z-index: 2;
@@ -86,5 +87,106 @@
         <a href="/" class="ui-panel button-panel">⮌ VOLVER</a>
 
     </div>
+    <script>
+        // Sistema de control global de música integrado
+        if (!window.globalMusicControl) {
+            class GlobalMusicControl {
+                constructor() {
+                    this.isMuted = localStorage.getItem('musicMuted') === 'true';
+                    this.audioElements = [];
+                }
+
+                registerAudio(audioElement, volume = 1) {
+                    audioElement.defaultVolume = volume;
+                    this.audioElements.push(audioElement);
+                    
+                    if (this.isMuted) {
+                        audioElement.volume = 0;
+                    } else {
+                        audioElement.volume = volume;
+                    }
+                }
+
+                toggleMute() {
+                    this.isMuted = !this.isMuted;
+                    localStorage.setItem('musicMuted', this.isMuted.toString());
+                    
+                    this.audioElements.forEach(audio => {
+                        if (this.isMuted) {
+                            audio.volume = 0;
+                        } else {
+                            audio.volume = audio.defaultVolume || 1;
+                        }
+                    });
+                    
+                    this.updateButton();
+                    
+                    window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
+                        detail: { isMuted: this.isMuted } 
+                    }));
+                }
+
+                updateButton() {
+                    const button = document.getElementById('muteButton');
+                    if (button) {
+                        if (this.isMuted) {
+                            button.textContent = '🔇';
+                            button.classList.add('muted');
+                        } else {
+                            button.textContent = '🔊';
+                            button.classList.remove('muted');
+                        }
+                    }
+                }
+
+                setupButton() {
+                    const button = document.getElementById('muteButton');
+                    if (button) {
+                        this.updateButton();
+                        button.addEventListener('click', () => this.toggleMute());
+                    }
+                    
+                    // Event listener para tecla M
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'm' || e.key === 'M') {
+                            this.toggleMute();
+                        }
+                    });
+                }
+            }
+
+            window.globalMusicControl = new GlobalMusicControl();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configurar el botón de silenciar
+            window.globalMusicControl.setupButton();
+
+            // Background music setup - MISMA MÚSICA QUE EN EL MENÚ PRINCIPAL
+            const backgroundMusic = new Audio('/media/solitario.mp3');
+            backgroundMusic.loop = true;
+            backgroundMusic.preload = 'auto';
+            
+            // Registrar audio con el sistema global
+            window.globalMusicControl.registerAudio(backgroundMusic, 0.8);
+
+            // Variable de control para inicio de música
+            let musicStarted = false;
+            
+            function startMusic() {
+                if (!musicStarted) {
+                    backgroundMusic.play().catch(error => {
+                        console.log('Music playback failed:', error);
+                    });
+                    musicStarted = true;
+                }
+            }
+
+            // Event listeners para iniciar música con interacción del usuario
+            document.addEventListener('click', startMusic, { once: true });
+            document.addEventListener('keydown', startMusic, { once: true });
+            document.addEventListener('touchstart', startMusic, { once: true });
+        });
+    </script>
 </body>
 </html>
