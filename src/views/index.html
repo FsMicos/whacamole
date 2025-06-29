@@ -52,5 +52,62 @@
         RECORDS</a>
   </div>
    <a href="/help" class="help-button">?</a>
+   <button class="mute-button" id="muteButton">🔊</button>
+   
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Background music setup
+      const backgroundMusic = new Audio('/media/solitario.mp3');
+      backgroundMusic.loop = true;
+      backgroundMusic.preload = 'auto';
+      backgroundMusic.volume = 0.3;
+
+      // Try to play music when user interacts with the page (to comply with browser autoplay policies)
+      let musicStarted = false;
+      let isMuted = false;
+      
+      // Referencias al botón de silenciar
+      const muteButton = document.getElementById('muteButton');
+      
+      function startMusic() {
+        if (!musicStarted) {
+          backgroundMusic.play().catch(error => {
+            console.log('Music playback failed:', error);
+          });
+          musicStarted = true;
+        }
+      }
+
+      // Función para alternar silencio
+      function toggleMute() {
+        if (isMuted) {
+          backgroundMusic.volume = 0.3;
+          muteButton.textContent = '🔊';
+          muteButton.classList.remove('muted');
+          isMuted = false;
+        } else {
+          backgroundMusic.volume = 0;
+          muteButton.textContent = '🔇';
+          muteButton.classList.add('muted');
+          isMuted = true;
+        }
+      }
+
+      // Event listener para el botón de silenciar
+      muteButton.addEventListener('click', toggleMute);
+
+      // Add event listeners for user interaction
+      document.addEventListener('click', startMusic, { once: true });
+      document.addEventListener('keydown', startMusic, { once: true });
+      document.addEventListener('touchstart', startMusic, { once: true });
+
+      // Optional: Add a mute/unmute button functionality with keyboard
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'm' || e.key === 'M') {
+          toggleMute();
+        }
+      });
+    });
+   </script>
 </body>
 </html>
