@@ -17,11 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            // Si el mensaje tiene una propiedad "button", es un golpe del control físico
+            // Si el mensaje tiene una propiedad "button", procesamos el botón
             if (data.hasOwnProperty('button')) {
-                console.log(` Golpe recibido del control físico en el agujero #${data.button}`);
-                // Llama a la función principal de golpeo con el índice del botón
-                attemptHitOnHole(data.button);
+                const buttonNumber = data.button;
+                
+                // BOTÓN 8 (9 en tu controlador): Pausa/Reanudar
+                if (buttonNumber === 8) {
+                    console.log(' Botón de pausa físico presionado');
+                    if (juegoPausado) {
+                        reanudarJuego();
+                    } else {
+                        pausarJuego();
+                    }
+                }
+                // BOTONES 0-7: Golpear agujeros (comportamiento original)
+                else {
+                    console.log(` Golpe recibido del control físico en el agujero #${buttonNumber}`);
+                    attemptHitOnHole(buttonNumber);
+                }
             }
         } catch (e) {
             console.error('Error al procesar el mensaje del control:', e);
