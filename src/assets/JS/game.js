@@ -17,15 +17,68 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundMusic.loop = true;
     backgroundMusic.preload = 'auto';
     backgroundMusic.volume = 0.3;
-    
+
     // --- VARIABLES DE ESTADO DEL JUEGO ---
     let currentTime = totalTime;
-    let score, moleInterval, totalMoles, successfulHits, reactionTimes, molePosition, consecutiveMisses, missedMoles,consecutiveHits, moleStartTime;
+    let score, moleInterval, totalMoles, successfulHits, reactionTimes, molePosition, consecutiveMisses, missedMoles, consecutiveHits, moleStartTime;
     let timerId = null;
     let moleTimerId = null;
     let gameInProgress = false;
     let juegoPausado = false;
-    
+
+    let currentDifficulty = 'Normal';
+
+    const ageDifficultyConfig = {
+        '3-5': {
+            name: 'Muy Fácil',
+            moleInterval: 4500,
+            minInterval: 3000,
+            maxInterval: 6000,
+            adaptationRate: 0.15
+        },
+        '6-10': {
+            name: 'Fácil',
+            moleInterval: 3000,
+            minInterval: 2000,
+            maxInterval: 4500,
+            adaptationRate: 0.25
+        },
+        '11+': {
+            name: 'Normal',
+            moleInterval: 2000,
+            minInterval: 800,
+            maxInterval: 3500,
+            adaptationRate: 0.35
+        }
+    };
+
+    function getAgeGroup(age) {
+        if (age >= 3 && age <= 5) return '3-5';
+        if (age >= 6 && age <= 10) return '6-10';
+        return '11+';
+    }
+
+    function setupBaseDifficulty(age) {
+        const group = getAgeGroup(age);
+        const config = ageDifficultyConfig[group];
+        moleInterval = config.moleInterval;
+        currentDifficulty = config.name;
+        console.log(`🎯 Dificultad inicial: ${currentDifficulty} (${group})`);
+    }
+
+
+    // --- INTENTAR CARGAR DATOS DEL JUGADOR (SIN VALIDACIÓN ESTRICTA) ---
+    let playerData = null;
+
+    try {
+        const savedPlayerData = sessionStorage.getItem('playerData');
+        if (savedPlayerData) {
+            playerData = JSON.parse(savedPlayerData);
+            console.log('Datos del jugador cargados:', playerData);
+        }
+    } catch (error) {
+        console.log('Error al cargar datos del jugador:', error);
+    }
 
     // --- FUNCIÓN CENTRALIZADA PARA ACTUALIZAR TIEMPO Y BARRA ---
     function updateTimer() {
@@ -46,44 +99,74 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundMusic.pause();
             gameInProgress = false;
 
-            
+
             showSaveScoreForm();
         }
     }
+
     //guardar 
     function showSaveScoreForm() {
         // Calcula las estadísticas finales una sola vez
         const tasaFinal = totalMoles > 0 ? parseFloat((successfulHits / totalMoles * 100).toFixed(1)) : 0;
         const promedioReaccion = reactionTimes.length > 0 ? parseInt((reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0)) : 0;
 
-        // Muestra el formulario
+        // Si tenemos datos del jugador, usarlos automáticamente
+        if (playerData && playerData.name && playerData.age) {
+            console.log('Usando datos del jugador registrado:', playerData);
+            const gameData = {
+                nickname: playerData.name,
+                score: score,
+                successfulHits: successfulHits,
+                missedMoles: missedMoles,
+                successRate: tasaFinal,
+                avgReactionTime: promedioReaccion,
+                playerAge: playerData.age
+            };
+
+            // Guardar directamente sin mostrar formulario
+            saveScoreToServer(gameData);
+            return;
+        }
+
+        // Si no hay datos del jugador, mostrar formulario como antes
+        console.log('No hay datos del jugador, mostrando formulario de guardado');
         const overlay = document.getElementById('save-score-overlay');
-        overlay.style.display = 'flex';
+        if (overlay) {
+            overlay.style.display = 'flex';
 
-        const saveButton = document.getElementById('save-score-button');
-        const nicknameInput = document.getElementById('nickname-input');
+            const saveButton = document.getElementById('save-score-button');
+            const nicknameInput = document.getElementById('nickname-input');
 
-        // Usamos .onclick para asegurarnos de que solo haya un listener
-        saveButton.onclick = () => {
-            const nickname = nicknameInput.value.toUpperCase();
-            if (nickname.length === 4) {
-                const gameData = {
-                    nickname: nickname,
-                    score: score,
-                    successfulHits: successfulHits,
-                    missedMoles: missedMoles,
-                    successRate: tasaFinal,
-                    avgReactionTime: promedioReaccion
+            if (saveButton && nicknameInput) {
+                // Usamos .onclick para asegurarnos de que solo haya un listener
+                saveButton.onclick = () => {
+                    const nickname = nicknameInput.value.toUpperCase();
+                    if (nickname.length === 4) {
+                        const gameData = {
+                            nickname: nickname,
+                            score: score,
+                            successfulHits: successfulHits,
+                            missedMoles: missedMoles,
+                            successRate: tasaFinal,
+                            avgReactionTime: promedioReaccion
+                        };
+
+                        // Llama a la función que envía los datos al servidor
+                        saveScoreToServer(gameData);
+                        overlay.style.display = 'none'; // Oculta el formulario
+                    } else {
+                        alert('¡Tu nick debe tener exactamente 4 caracteres!');
+                    }
                 };
-                
-                // Llama a la función que envía los datos al servidor
-                saveScoreToServer(gameData);
-                overlay.style.display = 'none'; // Oculta el formulario
-            } else {
-                alert('¡Tu nick debe tener exactamente 4 caracteres!');
             }
-        };
-    }    // los datos adquiridos los guarda en el servidor (database)
+        } else {
+            // Si no existe el overlay, ir directo a la pantalla final
+            console.log('No se encontró el overlay de guardado, mostrando pantalla final');
+            showGameOverScreen();
+        }
+    }
+
+    // los datos adquiridos los guarda en el servidor (database)
     async function saveScoreToServer(data) {
         try {
             const response = await fetch('/api/scores', {
@@ -100,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             console.log('Puntuación guardada:', result);
-            
+
             // Mostrar la pantalla de final de partida en lugar del alert
             showGameOverScreen();
 
@@ -114,37 +197,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para mostrar la pantalla final de partida
     function showGameOverScreen() {
         // Actualizar las estadísticas en la pantalla
-        document.getElementById('final-points').textContent = score;
-        document.getElementById('final-hits').textContent = successfulHits;
-        document.getElementById('final-misses').textContent = missedMoles;
-        
+        const finalPointsEl = document.getElementById('final-points');
+        const finalHitsEl = document.getElementById('final-hits');
+        const finalMissesEl = document.getElementById('final-misses');
+
+        if (finalPointsEl) finalPointsEl.textContent = score;
+        if (finalHitsEl) finalHitsEl.textContent = successfulHits;
+        if (finalMissesEl) finalMissesEl.textContent = missedMoles;
+
         // Mostrar el overlay
         const gameOverOverlay = document.getElementById('game-over-overlay');
-        gameOverOverlay.style.display = 'flex';
+        if (gameOverOverlay) {
+            gameOverOverlay.style.display = 'flex';
+        }
     }
-
 
     // --- FUNCIONES DE PAUSA / REANUDAR (LÓGICA SIMPLIFICADA) ---
     function pausarJuego() {
         if (!gameInProgress || juegoPausado) return;
         juegoPausado = true;
-        
+
         clearInterval(timerId);
         clearInterval(moleTimerId);
         backgroundMusic.pause();
 
-        document.getElementById("paused-overlay").style.display = "flex";
+        const pausedOverlay = document.getElementById("paused-overlay");
+        if (pausedOverlay) {
+            pausedOverlay.style.display = "flex";
+        }
     }
 
     function reanudarJuego() {
         if (!juegoPausado) return;
         juegoPausado = false;
 
-        backgroundMusic.play().catch(() => {});
+        backgroundMusic.play().catch(() => { });
         moleTimerId = setInterval(randomMole, moleInterval);
         timerId = setInterval(gameTick, 1000); // Reanuda el contador principal
 
-        document.getElementById("paused-overlay").style.display = "none";
+        const pausedOverlay = document.getElementById("paused-overlay");
+        if (pausedOverlay) {
+            pausedOverlay.style.display = "none";
+        }
     }
 
     function reiniciarJuego() {
@@ -152,24 +246,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (moleTimerId) clearInterval(moleTimerId);
         backgroundMusic.pause();
 
-        document.getElementById("paused-overlay").style.display = "none";
+        const pausedOverlay = document.getElementById("paused-overlay");
+        if (pausedOverlay) {
+            pausedOverlay.style.display = "none";
+        }
         startGame(); // Reinicia el juego desde cero
     }
 
     function volverAlInicio() {
         window.location.href = '/'; // O la ruta correcta a tu index.html
-    }    // --- ASIGNAR EVENTO A BOTONES ---
-    document.querySelector(".pause-button").addEventListener("click", pausarJuego);
-    document.querySelector(".resume-button").addEventListener("click", reanudarJuego);
-    document.querySelector(".restart-button").addEventListener("click", reiniciarJuego);
-    document.querySelector(".return-button").addEventListener("click", volverAlInicio);
-    
+    }
+
+    // --- ASIGNAR EVENTO A BOTONES (CON VERIFICACIÓN DE EXISTENCIA) ---
+    const pauseButton = document.querySelector(".pause-button");
+    const resumeButton = document.querySelector(".resume-button");
+    const restartButton = document.querySelector(".restart-button");
+    const returnButton = document.querySelector(".return-button");
+
+    if (pauseButton) pauseButton.addEventListener("click", pausarJuego);
+    if (resumeButton) resumeButton.addEventListener("click", reanudarJuego);
+    if (restartButton) restartButton.addEventListener("click", reiniciarJuego);
+    if (returnButton) returnButton.addEventListener("click", volverAlInicio);
+
     // Botones de la pantalla de final de partida
-    document.querySelector(".game-over-restart-button").addEventListener("click", () => {
-        document.getElementById("game-over-overlay").style.display = "none";
-        reiniciarJuego();
-    });
-    document.querySelector(".game-over-home-button").addEventListener("click", volverAlInicio);
+    const gameOverRestartButton = document.querySelector(".game-over-restart-button");
+    const gameOverHomeButton = document.querySelector(".game-over-home-button");
+
+    if (gameOverRestartButton) {
+        gameOverRestartButton.addEventListener("click", () => {
+            const gameOverOverlay = document.getElementById("game-over-overlay");
+            if (gameOverOverlay) {
+                gameOverOverlay.style.display = "none";
+            }
+            reiniciarJuego();
+        });
+    }
+
+    if (gameOverHomeButton) {
+        gameOverHomeButton.addEventListener("click", volverAlInicio);
+    }
 
     // --- LÓGICA DEL JUEGO ---
     function randomMole() {
@@ -204,16 +319,16 @@ document.addEventListener('DOMContentLoaded', () => {
         hole.addEventListener('click', (event) => {
             event.preventDefault();
             event.stopPropagation();
-            
+
             if (!gameInProgress || !hole.classList.contains('up') || hole !== molePosition) {
                 if (gameInProgress && molePosition && molePosition.classList.contains('up')) {
                     console.log(`❌ Clic fallido - clickeaste el agujero equivocado`);
                 }
                 return;
             }
-            
+
             hole.classList.remove('up');
-            
+
             const reactionTime = Date.now() - moleStartTime;
             reactionTimes.push(reactionTime);
 
@@ -225,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
             consecutiveMisses = 0;
             scoreBoard.textContent = score;
 
-
             console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
 
             hitSound.currentTime = 0;
@@ -236,31 +350,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 mole.classList.add('hit');
                 setTimeout(() => mole.classList.remove('hit'), 600);
             }
-            
+
             molePosition = null;
         });
     });
 
     function ajustarDificultad() {
-        if (totalMoles < 1) return;
+        if (totalMoles < 3) return;
 
+        const group = getAgeGroup(playerData?.age || 11);
+        const config = ageDifficultyConfig[group];
         const tasaAciertos = successfulHits / totalMoles;
-        let nuevoIntervalo = moleInterval;
+        const promedioReaccion = reactionTimes.length > 0
+            ? reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length
+            : 1000;
 
-        if (consecutiveHits >= 3) {
-            nuevoIntervalo = Math.max(400, moleInterval - 600);
-            console.log(`🔥 3+ aciertos consecutivos! Aumentando velocidad a ${nuevoIntervalo}ms`);
-        } else if (tasaAciertos >= 0.7) {
-            nuevoIntervalo = Math.max(800, moleInterval - 300);
-            console.log(`🚀 Buen rendimiento! Acelerando a ${nuevoIntervalo}ms`);
-        } else if (tasaAciertos <= 0.4) {
-            nuevoIntervalo = Math.min(4000, moleInterval + 500);
-            console.log(`📉 Rendimiento bajo! Desacelerando a ${nuevoIntervalo}ms`);
+        let adjustment = 0;
+
+        if (tasaAciertos >= 0.8 && consecutiveHits >= 4) {
+            adjustment = -800;
+            currentDifficulty = 'Muy Difícil';
+        } else if (tasaAciertos >= 0.7 && promedioReaccion < 600) {
+            adjustment = -400;
+            currentDifficulty = 'Difícil';
+        } else if (tasaAciertos >= 0.5 && promedioReaccion < 1000) {
+            adjustment = -200;
+            currentDifficulty = 'Normal+';
+        } else if (tasaAciertos <= 0.3 || consecutiveMisses >= 5) {
+            adjustment = 600;
+            currentDifficulty = 'Fácil';
+        } else if (promedioReaccion > 1500) {
+            adjustment = 800;
+            currentDifficulty = 'Muy Fácil';
         }
+
+        adjustment *= config.adaptationRate;
+        const nuevoIntervalo = Math.max(config.minInterval, Math.min(config.maxInterval, moleInterval + adjustment));
 
         if (Math.abs(nuevoIntervalo - moleInterval) >= 100) {
             moleInterval = nuevoIntervalo;
-            console.log(`🔄 CAMBIO APLICADO - Nuevo intervalo: ${moleInterval}ms`);
+            console.log(`🔁 Dificultad ajustada a "${currentDifficulty}" | Intervalo: ${moleInterval}ms`);
             clearInterval(moleTimerId);
             moleTimerId = setInterval(randomMole, moleInterval);
         }
@@ -272,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         juegoPausado = false;
 
         backgroundMusic.currentTime = 0;
-        backgroundMusic.play().catch(() => {});
+        backgroundMusic.play().catch(() => { });
 
         if (timerId) clearInterval(timerId);
         if (moleTimerId) clearInterval(moleTimerId);
@@ -288,7 +417,10 @@ document.addEventListener('DOMContentLoaded', () => {
         molePosition = null;
         consecutiveMisses = 0;
         consecutiveHits = 0;
-        
+
+        const playerData = JSON.parse(sessionStorage.getItem('playerData') || '{}');
+        setupBaseDifficulty(playerData.age || 11);
+
         scoreBoard.textContent = score;
         updateTimer(); // CORREGIDO: Llamada inicial para establecer la UI (texto y barra) correctamente
 
@@ -302,6 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
         randomMole(); // Muestra el primer topo inmediatamente
         moleTimerId = setInterval(randomMole, moleInterval);
         timerId = setInterval(gameTick, 1000); // CORREGIDO: Usa la función centralizada
-    }    // Inicia el juego cuando la página carga
+    }
+
+    // Inicia el juego cuando la página carga
     startGame();
 });

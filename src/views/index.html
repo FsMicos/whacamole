@@ -11,13 +11,32 @@
   
   <!-- 2. Enlazar el archivo CSS unificado -->
   <link rel="stylesheet" href="/css/ui-styles.css"> 
+  <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/help-style.css"> 
 </head>
 <body>
+
+  <div id="player-info-overlay">
+    <div class="registration-form">
+      <div class="registration-title">REGISTRO</div>
+      
+      <label class="form-label" for="player-name">Nombre (4 letras):</label>
+      <input type="text" id="player-name" class="form-input" maxlength="4" placeholder="NICK">
+      
+      <label class="form-label" for="player-age">Edad:</label>
+      <input type="number" id="player-age" class="form-input" min="1" max="120" placeholder="25">
+      
+      <button id="start-button" class="continue-button">CONTINUAR</button>
+    </div>
+  </div>
   <!-- 3. Usar el contenedor wrapper para centrar el contenido -->
   <div class="home-panel-wrapper">
       <!-- Título con estilos de ui-panel -->
       <div class="ui-panel title-panel">PEGALE AL TOPO</div>
+
+      <div class="ui-panel player-info-panel" id="player-info" style="display: none;">
+        Jugador: <span id="player-name-display"></span>
+      </div>
       
       <!-- Botón de Jugar como un enlace con estilos de ui-panel -->
       <a href="/game" class="ui-panel button-panel"><svg width="30" height="28" viewBox="0 0 30 28" fill="none"
@@ -107,6 +126,147 @@
           toggleMute();
         }
       });
+
+      let playerRegistered = false;
+      let playerData = {
+        name: '',
+        age: 0
+      };
+
+      // Referencias a elementos del DOM 
+      const registrationOverlay = document.getElementById('player-info-overlay');
+      const startRegistrationButton = document.getElementById('start-button');
+      const playerNameInput = document.getElementById('player-name');
+      const playerAgeInput = document.getElementById('player-age');
+      const playerInfo = document.getElementById('player-info');
+      const playerNameDisplay = document.getElementById('player-name-display');
+      const playButton = document.querySelector('a[href="/game"]');
+
+      if (!registrationOverlay || !startRegistrationButton || !playerNameInput || !playerAgeInput) {
+        console.error('Error: No se pudieron encontrar todos los elementos del DOM necesarios');
+        return;
+      }
+
+      // === LÓGICA DEL SISTEMA DE REGISTRO ===
+
+      // Función para validar los datos del formulario
+      function validateRegistration() {
+        const name = playerNameInput.value.trim().toUpperCase();
+        const age = parseInt(playerAgeInput.value);
+
+        if (name.length !== 4) {
+          alert('El nombre debe tener exactamente 4 letras');
+          return false;
+        }
+
+        if (isNaN(age) || age < 1 || age > 120) {
+          alert('La edad debe ser un número entre 1 y 120');
+          return false;
+        }
+
+        return true;
+      }
+
+      // Función para completar el registro
+      function completeRegistration() {
+        if (validateRegistration()) {
+          playerData.name = playerNameInput.value.trim().toUpperCase();
+          playerData.age = parseInt(playerAgeInput.value);
+          
+          // Guardar en sessionStorage para acceso desde otras páginas (solo durante la sesión)
+          sessionStorage.setItem('playerData', JSON.stringify(playerData));
+          
+          // Mostrar información del jugador
+          playerNameDisplay.textContent = playerData.name;
+          playerInfo.style.display = 'block';
+                    
+           if (registrationOverlay) {
+            registrationOverlay.classList.add('hidden');
+            console.log('Overlay ocultado');
+          } else {
+            console.error('No se pudo encontrar el overlay de registro');
+          }
+          
+          playerRegistered = true;
+          
+          console.log('Jugador registrado:', playerData);
+        }
+      }
+
+      // Event listeners para el formulario de registro
+      startRegistrationButton.addEventListener('click', completeRegistration);
+
+      // Permitir registro con Enter
+      playerNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          playerAgeInput.focus();
+        }
+      });
+
+      playerAgeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          completeRegistration();
+        }
+      });
+
+      // Convertir automáticamente el nombre a mayúsculas
+      playerNameInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+      });
+
+      // Prevenir navegación al juego si no está registrado
+      playButton.addEventListener('click', (e) => {
+        if (!playerRegistered) {
+          e.preventDefault();
+          alert('Debes registrarte antes de jugar');
+        }
+      });
+
+      // === VERIFICAR REGISTRO EN SESSIONSTORAGE ===
+      
+      // Verificar si hay datos de jugador en la sesión actual
+      const savedPlayerData = sessionStorage.getItem('playerData');
+      if (savedPlayerData) {
+        try {
+          const parsedData = JSON.parse(savedPlayerData);
+          if (parsedData.name && parsedData.age) {
+            playerData = parsedData;
+            playerNameDisplay.textContent = playerData.name;
+            playerInfo.style.display = 'block';
+            registrationOverlay.classList.add('hidden');
+            playerRegistered = true;
+            console.log('Jugador cargado desde sessionStorage:', playerData);
+          }
+        } catch (error) {
+          console.log('Error al cargar datos del jugador:', error);
+          sessionStorage.removeItem('playerData');
+        }
+      } else {
+        // Si no hay datos en sessionStorage, mostrar el registro
+        registrationOverlay.classList.remove('hidden');
+        playerInfo.style.display = 'none';
+        console.log('No hay registro en la sesión - Usuario debe registrarse');
+      }
+
+      // Función global para obtener datos del jugador (accesible desde game.js)
+      window.getPlayerData = function() {
+        return playerData;
+      };
+
+      // Función global para verificar si el jugador está registrado
+      window.isPlayerRegistered = function() {
+        return playerRegistered;
+      };
+
+      // Función global para limpiar registro (útil para logout)
+      window.clearPlayerRegistration = function() {
+        sessionStorage.removeItem('playerData');
+        playerRegistered = false;
+        playerData = { name: '', age: 0 };
+        playerInfo.style.display = 'none';
+        registrationOverlay.classList.remove('hidden');
+      };
+
     });
    </script>
 </body>
