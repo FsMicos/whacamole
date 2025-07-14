@@ -146,6 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let juegoPausado = false;
 
     let currentDifficulty = 'Normal';
+    // --- VARIABLES para IA ---
+let aciertos_por_agujero = {};
+let fallos_por_agujero = {};
+let tiempos_agujero = {};
+let intervaloActual = 3000;
+let evaluacionIntervalId = null;
+
 
     const ageDifficultyConfig = {
         '3-5': {
@@ -257,6 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTime <= 0) {
             clearInterval(timerId);
             clearInterval(moleTimerId);
+            clearInterval(evaluacionIntervalId); // 🧽 limpiar evaluación IA
+
             backgroundMusic.pause();
             gameInProgress = false;
 
@@ -425,6 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (molePosition && molePosition.classList.contains('up')) {
             molePosition.classList.remove('up');
             missedMoles++;
+            const agujeroIndex = [...holes].indexOf(molePosition);
+            fallos_por_agujero[agujeroIndex] = (fallos_por_agujero[agujeroIndex] || 0) + 1;
+
             consecutiveMisses++;
             consecutiveHits = 0;
         }
@@ -444,44 +456,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     holes.forEach(hole => {
-        hole.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
+    hole.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-            if (!gameInProgress || !hole.classList.contains('up') || hole !== molePosition) {
-                if (gameInProgress && molePosition && molePosition.classList.contains('up')) {
-                    console.log(`❌ Clic fallido - clickeaste el agujero equivocado`);
-                }
-                return;
+        if (!gameInProgress || !hole.classList.contains('up') || hole !== molePosition) {
+            if (gameInProgress && molePosition && molePosition.classList.contains('up')) {
+                console.log(`❌ Clic fallido - clickeaste el agujero equivocado`);
             }
+            return;
+        }
 
-            hole.classList.remove('up');
+        hole.classList.remove('up');
 
-            const reactionTime = Date.now() - moleStartTime;
-            reactionTimes.push(reactionTime);
+        const agujeroIndex = [...holes].indexOf(hole);
+        const reactionTime = Date.now() - moleStartTime;
 
-            //premiar la reaccion rapida
-            const puntosGanados = Math.max(1, Math.round(1000 / reactionTime));
-            score += puntosGanados;
-            successfulHits++;
-            consecutiveHits++;
-            consecutiveMisses = 0;
-            scoreBoard.textContent = score;
+        // ✅ Ahora sí podemos usar reactionTime sin errores
+        aciertos_por_agujero[agujeroIndex] = (aciertos_por_agujero[agujeroIndex] || 0) + 1;
+        tiempos_agujero[agujeroIndex] = reactionTime / 1000;
 
-            console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
+        reactionTimes.push(reactionTime);
 
-            hitSound.currentTime = 0;
-            hitSound.play().catch(e => console.log('Error reproduciendo sonido:', e));
+        const puntosGanados = Math.max(1, Math.round(1000 / reactionTime));
+        score += puntosGanados;
+        successfulHits++;
+        consecutiveHits++;
+        consecutiveMisses = 0;
+        scoreBoard.textContent = score;
 
-            const mole = hole.querySelector('.mole');
-            if (mole) {
-                mole.classList.add('hit');
-                setTimeout(() => mole.classList.remove('hit'), 600);
-            }
+        console.log(`✅ ¡Acierto! Tiempo: ${reactionTime}ms, Aciertos consecutivos: ${consecutiveHits}`);
 
-            molePosition = null;
-        });
+        hitSound.currentTime = 0;
+        hitSound.play().catch(e => console.log('Error reproduciendo sonido:', e));
+
+        const mole = hole.querySelector('.mole');
+        if (mole) {
+            mole.classList.add('hit');
+            setTimeout(() => mole.classList.remove('hit'), 600);
+        }
+
+        molePosition = null;
     });
+});
+
 
     function ajustarDificultad() {
         if (totalMoles < 3) return;
@@ -553,10 +571,69 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mole) mole.classList.remove('hit');
         });
         randomMole();
+
+        // 🚀 Evaluación automática con IA cada 3 segundos
+evaluacionIntervalId = setInterval(() => {
+    if (!gameInProgress || juegoPausado) return;
+
+    const datos = generarDatosEvaluacion();
+
+    fetch('/api/evaluar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    })
+    .then(res => res.json())
+    .then(respuesta => {
+        ajustarDificultadConIA(respuesta.velocidad_sugerida);
+    })
+    .catch(err => console.error('❌ Error al contactar IA:', err));
+}, 5000);
+
+
+        // Inicia los ciclos del juego
+        randomMole(); // Muestra el primer topo inmediatamente
         moleTimerId = setInterval(randomMole, moleInterval);
         timerId = setInterval(gameTick, 1000);
     }
 
     // Inicia el juego cuando la página carga
     startGame();
+
+
+    function generarDatosEvaluacion() {
+    const tasa_exito = successfulHits / ((successfulHits + missedMoles) || 1);
+    const promedioReaccion = reactionTimes.length > 0
+        ? reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length
+        : 0;
+
+    return {
+        aciertos: successfulHits,
+        fallos: missedMoles,
+        tasa_exito: parseFloat(tasa_exito.toFixed(2)),
+        tiempo_reaccion_promedio: parseFloat((promedioReaccion / 1000).toFixed(2)),
+        puntuacion: score,
+        aciertos_agujero_0: aciertos_por_agujero[0] || 0,
+        aciertos_agujero_4: aciertos_por_agujero[4] || 0,
+        fallos_agujero_5: fallos_por_agujero[5] || 0,
+        tiempo_reaccion_agujero_1: tiempos_agujero[1] || 0,
+        tiempo_reaccion_agujero_6: tiempos_agujero[6] || 0
+    };
+}
+
+function ajustarDificultadConIA(velocidad) {
+    let nuevoIntervalo;
+    if (velocidad === 'alta') nuevoIntervalo = 800;
+    else if (velocidad === 'media') nuevoIntervalo = 1200;
+    else nuevoIntervalo = 1800;
+
+    if (nuevoIntervalo !== intervaloActual) {
+        intervaloActual = nuevoIntervalo;
+        console.log(`🧠 Nueva velocidad sugerida por IA: ${velocidad} (${nuevoIntervalo}ms)`);
+
+        clearInterval(moleTimerId);
+        moleTimerId = setInterval(randomMole, nuevoIntervalo);
+    }
+}
+
 });
