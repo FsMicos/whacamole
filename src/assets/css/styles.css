@@ -191,6 +191,14 @@ p {
   overflow: hidden;
 }
 
+/* Colores para los agujeros */
+.hole.amarillo { background-image: url('/img/agujero_amarillo.png'); }
+.hole.azul    { background-image: url('/img/agujero_azul.png'); }
+.hole.rosado  { background-image: url('/img/agujero_rosado.png'); }
+.hole.verde   { background-image: url('/img/agujero_verde.png'); }
+
+/* Asegura que el tamaño y repeat ya definidos antes se apliquen — no es necesario repetirlos */
+
 
 
 /* RESPONSIVE: Ajustes para pantallas más pequeñas */
