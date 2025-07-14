@@ -1,23 +1,142 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- SELECCIÓN DE ELEMENTOS DEL DOM ---
     const gameContainer = document.querySelector('#game-container');
     const holes = document.querySelectorAll('.hole');
     const scoreBoard = document.querySelector('#score');
-    const timeLeft = document.querySelector('#time-left'); // Elemento para el número del tiempo
+    const timeLeft = document.querySelector('#time-left');
     const progressFill = document.getElementById('progress-fill');
     const totalTime = 60;
+
+    // Se conecta al mismo host y puerto que el servidor Express (http://localhost:3000)
+    const socket = new WebSocket(`ws://${window.location.host}`);
+
+    socket.onopen = () => {
+        console.log('Conectado al servidor del juego vía WebSocket. ¡Control físico activado!');
+    };
+
+    socket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            // Si el mensaje tiene una propiedad "button", procesamos el botón
+            if (data.hasOwnProperty('button')) {
+                const buttonNumber = data.button;
+                
+                // BOTÓN 8 (9 en tu controlador): Pausa/Reanudar
+                if (buttonNumber === 8) {
+                    console.log(' Botón de pausa físico presionado');
+                    if (juegoPausado) {
+                        reanudarJuego();
+                    } else {
+                        pausarJuego();
+                    }
+                }
+                // BOTONES 0-7: Golpear agujeros (comportamiento original)
+                else {
+                    console.log(` Golpe recibido del control físico en el agujero #${buttonNumber}`);
+                    attemptHitOnHole(buttonNumber);
+                }
+            }
+        } catch (e) {
+            console.error('Error al procesar el mensaje del control:', e);
+        }
+    };
+
+    socket.onclose = () => {
+        console.warn('X Desconectado del servidor WebSocket. El control físico no funcionará.');
+    };
+
+    socket.onerror = (error) => {
+        console.error('Error en la conexión WebSocket:', error);
+    };
+
+    // --- SISTEMA DE CONTROL GLOBAL DE MÚSICA (INTEGRADO) ---
+    // Crear el sistema si no existe
+    if (!window.globalMusicControl) {
+        class GlobalMusicControl {
+            constructor() {
+                this.isMuted = localStorage.getItem('musicMuted') === 'true';
+                this.audioElements = [];
+            }
+
+            registerAudio(audioElement, volume = 1) {
+                audioElement.defaultVolume = volume;
+                this.audioElements.push(audioElement);
+                
+                if (this.isMuted) {
+                    audioElement.volume = 0;
+                } else {
+                    audioElement.volume = volume;
+                }
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                localStorage.setItem('musicMuted', this.isMuted.toString());
+                
+                this.audioElements.forEach(audio => {
+                    if (this.isMuted) {
+                        audio.volume = 0;
+                    } else {
+                        audio.volume = audio.defaultVolume || 1;
+                    }
+                });
+                
+                this.updateButton();
+                
+                window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
+                    detail: { isMuted: this.isMuted } 
+                }));
+            }
+
+            updateButton() {
+                const button = document.getElementById('muteButton');
+                if (button) {
+                    if (this.isMuted) {
+                        button.textContent = '🔇';
+                        button.classList.add('muted');
+                    } else {
+                        button.textContent = '🔊';
+                        button.classList.remove('muted');
+                    }
+                }
+            }
+
+            setupButton() {
+                const button = document.getElementById('muteButton');
+                if (button) {
+                    this.updateButton();
+                    button.addEventListener('click', () => this.toggleMute());
+                }
+                
+                // Event listener para tecla M
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'm' || e.key === 'M') {
+                        this.toggleMute();
+                    }
+                });
+            }
+
+            isGloballyMuted() {
+                return this.isMuted;
+            }
+        }
+
+        window.globalMusicControl = new GlobalMusicControl();
+        window.globalMusicControl.setupButton();
+    }
 
     // --- CONFIGURACIÓN DE AUDIO ---
     const hitSound = new Audio('/media/Explosion.mp3');
     hitSound.preload = 'auto';
     hitSound.volume = 0.6;
-
+    
     const backgroundMusic = new Audio('/media/Kubbi.mp3');
     backgroundMusic.loop = true;
     backgroundMusic.preload = 'auto';
-    backgroundMusic.volume = 0.3;
-
+    
+    // Registrar audio con el sistema global
+    window.globalMusicControl.registerAudio(backgroundMusic, 0.3);
+    
     // --- VARIABLES DE ESTADO DEL JUEGO ---
     let currentTime = totalTime;
     let score, moleInterval, totalMoles, successfulHits, reactionTimes, molePosition, consecutiveMisses, missedMoles, consecutiveHits, moleStartTime;
@@ -80,19 +199,61 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Error al cargar datos del jugador:', error);
     }
 
-    // --- FUNCIÓN CENTRALIZADA PARA ACTUALIZAR TIEMPO Y BARRA ---
+    // Esta función maneja un intento de golpe, ya sea por clic o por botón físico.
+    function attemptHitOnHole(holeIndex) {
+        const hole = holes[holeIndex];
+
+        // Comprobaciones: ¿el juego está en curso? ¿hay un topo ahí?
+        if (!gameInProgress || !hole.classList.contains('up') || hole !== molePosition) {
+            // Si fallas, no haces nada (o podrías añadir una penalización aquí)
+            return;
+        }
+
+        // --- Lógica de un golpe exitoso ---
+        hole.classList.remove('up');
+        
+        const reactionTime = Date.now() - moleStartTime;
+        reactionTimes.push(reactionTime);
+
+        const puntosGanados = Math.max(1, Math.round(1000 / reactionTime));
+        score += puntosGanados;
+        successfulHits++;
+        consecutiveHits++;
+        consecutiveMisses = 0;
+        scoreBoard.textContent = score;
+
+        console.log(` ¡Acierto en agujero #${holeIndex}! Tiempo: ${reactionTime}ms`);
+
+        hitSound.currentTime = 0;
+        hitSound.play().catch(e => console.log('Error reproduciendo sonido:', e));
+
+        const mole = hole.querySelector('.mole');
+        if (mole) {
+            mole.classList.add('hit');
+            setTimeout(() => mole.classList.remove('hit'), 600);
+        }
+        
+        molePosition = null; // Marca el topo como golpeado
+    }
+    
+    // --- MODIFICADO: Asignación de clics del ratón ---
+    // Ahora, el evento 'click' simplemente llama a nuestra nueva función centralizada.
+    holes.forEach((hole, index) => {
+        hole.addEventListener('click', () => {
+            attemptHitOnHole(index);
+        });
+    });
+  
     function updateTimer() {
         timeLeft.textContent = currentTime;
         const progressPercent = (currentTime / totalTime) * 100;
         progressFill.style.width = `${progressPercent}%`;
     }
 
-    // --- FUNCIÓN DEL CICLO PRINCIPAL DEL JUEGO (CADA SEGUNDO) ---
     function gameTick() {
         if (juegoPausado) return;
         currentTime--;
         updateTimer();
-
         if (currentTime <= 0) {
             clearInterval(timerId);
             clearInterval(moleTimerId);
@@ -106,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //guardar 
     function showSaveScoreForm() {
-        // Calcula las estadísticas finales una sola vez
         const tasaFinal = totalMoles > 0 ? parseFloat((successfulHits / totalMoles * 100).toFixed(1)) : 0;
         const promedioReaccion = reactionTimes.length > 0 ? parseInt((reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length).toFixed(0)) : 0;
 
@@ -171,16 +331,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/api/scores', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (!response.ok) {
-                throw new Error('La respuesta del servidor no fue OK');
-            }
-
+            if (!response.ok) throw new Error('La respuesta del servidor no fue OK');
             const result = await response.json();
             console.log('Puntuación guardada:', result);
 
@@ -212,62 +366,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- FUNCIONES DE PAUSA / REANUDAR (LÓGICA SIMPLIFICADA) ---
     function pausarJuego() {
         if (!gameInProgress || juegoPausado) return;
         juegoPausado = true;
-
         clearInterval(timerId);
         clearInterval(moleTimerId);
         backgroundMusic.pause();
-
-        const pausedOverlay = document.getElementById("paused-overlay");
-        if (pausedOverlay) {
-            pausedOverlay.style.display = "flex";
-        }
+        document.getElementById("paused-overlay").style.display = "flex";
     }
 
     function reanudarJuego() {
         if (!juegoPausado) return;
         juegoPausado = false;
-
-        backgroundMusic.play().catch(() => { });
+        backgroundMusic.play().catch(() => {});
         moleTimerId = setInterval(randomMole, moleInterval);
-        timerId = setInterval(gameTick, 1000); // Reanuda el contador principal
-
-        const pausedOverlay = document.getElementById("paused-overlay");
-        if (pausedOverlay) {
-            pausedOverlay.style.display = "none";
-        }
+        timerId = setInterval(gameTick, 1000);
+        document.getElementById("paused-overlay").style.display = "none";
     }
 
     function reiniciarJuego() {
         if (timerId) clearInterval(timerId);
         if (moleTimerId) clearInterval(moleTimerId);
         backgroundMusic.pause();
-
-        const pausedOverlay = document.getElementById("paused-overlay");
-        if (pausedOverlay) {
-            pausedOverlay.style.display = "none";
-        }
-        startGame(); // Reinicia el juego desde cero
+        document.getElementById("paused-overlay").style.display = "none";
+        startGame();
     }
 
     function volverAlInicio() {
         window.location.href = '/'; // O la ruta correcta a tu index.html
     }
 
-    // --- ASIGNAR EVENTO A BOTONES (CON VERIFICACIÓN DE EXISTENCIA) ---
-    const pauseButton = document.querySelector(".pause-button");
-    const resumeButton = document.querySelector(".resume-button");
-    const restartButton = document.querySelector(".restart-button");
-    const returnButton = document.querySelector(".return-button");
-
-    if (pauseButton) pauseButton.addEventListener("click", pausarJuego);
-    if (resumeButton) resumeButton.addEventListener("click", reanudarJuego);
-    if (restartButton) restartButton.addEventListener("click", reiniciarJuego);
-    if (returnButton) returnButton.addEventListener("click", volverAlInicio);
-
+    // --- ASIGNAR EVENTO A BOTONES ---
+    document.querySelector(".pause-button").addEventListener("click", pausarJuego);
+    document.querySelector(".resume-button").addEventListener("click", reanudarJuego);
+    document.querySelector(".restart-button").addEventListener("click", reiniciarJuego);
+    document.querySelector(".return-button").addEventListener("click", volverAlInicio);
+    
     // Botones de la pantalla de final de partida
     const gameOverRestartButton = document.querySelector(".game-over-restart-button");
     const gameOverHomeButton = document.querySelector(".game-over-home-button");
@@ -286,17 +420,14 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOverHomeButton.addEventListener("click", volverAlInicio);
     }
 
-    // --- LÓGICA DEL JUEGO ---
     function randomMole() {
         if (!gameInProgress || juegoPausado) return;
-
         if (molePosition && molePosition.classList.contains('up')) {
             molePosition.classList.remove('up');
             missedMoles++;
             consecutiveMisses++;
             consecutiveHits = 0;
         }
-
         holes.forEach(hole => {
             hole.classList.remove('up');
             const mole = hole.querySelector('.mole');
@@ -304,14 +435,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 mole.classList.remove('hit');
             }
         });
-
         let randomHole = holes[Math.floor(Math.random() * holes.length)];
         randomHole.classList.add('up');
-
         molePosition = randomHole;
         moleStartTime = Date.now();
         totalMoles++;
-
         ajustarDificultad();
     }
 
@@ -399,14 +527,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameInProgress && !juegoPausado) return;
         gameInProgress = true;
         juegoPausado = false;
-
         backgroundMusic.currentTime = 0;
-        backgroundMusic.play().catch(() => { });
-
+        backgroundMusic.play().catch(() => {});
         if (timerId) clearInterval(timerId);
         if (moleTimerId) clearInterval(moleTimerId);
-
-        // Reinicia todas las variables de estado
         score = 0;
         currentTime = totalTime;
         moleInterval = 3000;
@@ -422,18 +546,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setupBaseDifficulty(playerData.age || 11);
 
         scoreBoard.textContent = score;
-        updateTimer(); // CORREGIDO: Llamada inicial para establecer la UI (texto y barra) correctamente
-
+        updateTimer();
         holes.forEach(hole => {
             hole.classList.remove('up');
             const mole = hole.querySelector('.mole');
             if (mole) mole.classList.remove('hit');
         });
-
-        // Inicia los ciclos del juego
-        randomMole(); // Muestra el primer topo inmediatamente
+        randomMole();
         moleTimerId = setInterval(randomMole, moleInterval);
-        timerId = setInterval(gameTick, 1000); // CORREGIDO: Usa la función centralizada
+        timerId = setInterval(gameTick, 1000);
     }
 
     // Inicia el juego cuando la página carga

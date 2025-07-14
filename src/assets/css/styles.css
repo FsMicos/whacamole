@@ -147,31 +147,95 @@ p {
 }
 
 /* === 3. CUADRÍCULA DEL JUEGO === */
+/* === 3. CUADRÍCULA DEL JUEGO === */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  /* Usamos las dimensiones de la imagen del agujero para calcular el gap */
+  /* CAMBIADO: Nueva estructura de columnas para crear separación */
+  grid-template-columns: repeat(2, 1fr) 150px repeat(2, 1fr); /* 2 agujeros + espacio + 2 agujeros */
+  grid-template-rows: repeat(2, 1fr); /* 2 filas */
+  
+  /* Mantén tu gap original */
   gap: 30px; 
   padding: 20px;
   margin-bottom: 5vh;
-  /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
-  margin-top: auto; 
+  margin-top: auto;
+  
+  /* Para centrar el grid completo */
+  justify-content: center;
+  align-items: center;
 }
 
+/* NUEVO: Posicionamiento específico de cada agujero */
+.grid .hole:nth-child(1) { grid-area: 1 / 1; } /* Fila 1, Columna 1 */
+.grid .hole:nth-child(2) { grid-area: 1 / 2; } /* Fila 1, Columna 2 */
+.grid .hole:nth-child(3) { grid-area: 1 / 4; } /* Fila 1, Columna 4 (salta la 3) */
+.grid .hole:nth-child(4) { grid-area: 1 / 5; } /* Fila 1, Columna 5 */
+.grid .hole:nth-child(5) { grid-area: 2 / 1; } /* Fila 2, Columna 1 */
+.grid .hole:nth-child(6) { grid-area: 2 / 2; } /* Fila 2, Columna 2 */
+.grid .hole:nth-child(7) { grid-area: 2 / 4; } /* Fila 2, Columna 4 (salta la 3) */
+.grid .hole:nth-child(8) { grid-area: 2 / 5; } /* Fila 2, Columna 5 */
+
+
+
 /* === 4. ESTILOS DEL AGUJERO === */
+/* TUS ESTILOS ORIGINALES SE MANTIENEN IGUAL */
 .hole {
- 
   width: 250px;
   height: 108px;
   
-  background-image: url('/img/agujero.png'); /* Ruta a tu imagen del agujero */
-  background-size: 250px 108px; /* 'contain' asegura que la imagen completa quepa dentro del div */
+  background-image: url('/img/agujero.png');
+  background-size: 250px 108px;
   background-repeat: no-repeat;
   background-position: center;
-  position: relative; /* Necesario para que el topo se posicione dentro del agujero */
-  overflow: hidden; /* Oculta al topo cuando está "debajo" */
+  position: relative;
+  overflow: hidden;
 }
 
+/* Colores para los agujeros */
+.hole.amarillo { background-image: url('/img/agujero_amarillo.png'); }
+.hole.azul    { background-image: url('/img/agujero_azul.png'); }
+.hole.rosado  { background-image: url('/img/agujero_rosado.png'); }
+.hole.verde   { background-image: url('/img/agujero_verde.png'); }
+
+/* Asegura que el tamaño y repeat ya definidos antes se apliquen — no es necesario repetirlos */
+
+
+
+/* RESPONSIVE: Ajustes para pantallas más pequeñas */
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 120px repeat(2, 1fr);
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 80px repeat(2, 1fr);
+    gap: 20px;
+    padding: 15px;
+  }
+  
+  .hole {
+    width: 200px;
+    height: 86px;
+    background-size: 200px 86px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 60px repeat(2, 1fr);
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .hole {
+    width: 150px;
+    height: 65px;
+    background-size: 150px 65px;
+  }
+}
 /* ESTILOS DEL TOPO === */
 .mole {
   width: 150px; /* Width of a single frame */

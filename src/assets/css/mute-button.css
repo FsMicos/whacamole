@@ -1,0 +1,48 @@
+.mute-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem; /* Posicionado a la izquierda para no chocar con el help button */
+  
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background-color: #8c5a32;
+  border: 4px solid #301c0a;
+  border-radius: 8px;
+  box-shadow: 0 6px 0 #301c0a;
+  
+  color: #ffffff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.1s ease-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mute-button:hover {
+  background-color: #c9997e;
+}
+
+.mute-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #8a624a;
+}
+
+/* Estado cuando está silenciado */
+.mute-button.muted {
+  background-color: #666;
+  border-color: #333;
+  box-shadow: 0 6px 0 #333;
+}
+
+.mute-button.muted:hover {
+  background-color: #888;
+}
+
+.mute-button.muted:active {
+  box-shadow: 0 2px 0 #555;
+}
