@@ -393,13 +393,39 @@ let evaluacionIntervalId = null;
         document.getElementById("paused-overlay").style.display = "none";
     }
 
-    function reiniciarJuego() {
-        if (timerId) clearInterval(timerId);
-        if (moleTimerId) clearInterval(moleTimerId);
-        backgroundMusic.pause();
-        document.getElementById("paused-overlay").style.display = "none";
-        startGame();
+    async function reiniciarJuego() {
+    if (timerId) clearInterval(timerId);
+    if (moleTimerId) clearInterval(moleTimerId);
+    backgroundMusic.pause();
+    document.getElementById("paused-overlay").style.display = "none";
+
+    // 🧠 Evaluar el rendimiento anterior
+    const datos = generarDatosEvaluacion();
+
+    try {
+        const response = await fetch('http://localhost:5000/predecir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+
+        const result = await response.json();
+        const velocidad = result.velocidad_clasificada;
+
+        if (velocidad === 'alta') intervaloActual = 800;
+        else if (velocidad === 'media') intervaloActual = 1200;
+        else intervaloActual = 1800;
+
+        console.log(`🧠 IA seleccionó dificultad: ${velocidad} (${intervaloActual}ms)`);
+
+    } catch (error) {
+        console.error('❌ Error al obtener dificultad de IA:', error);
+        intervaloActual = 3000; // fallback
     }
+
+    startGame();
+}
+
 
     function volverAlInicio() {
         window.location.href = '/'; // O la ruta correcta a tu index.html
@@ -537,7 +563,7 @@ let evaluacionIntervalId = null;
             moleInterval = nuevoIntervalo;
             console.log(`🔁 Dificultad ajustada a "${currentDifficulty}" | Intervalo: ${moleInterval}ms`);
             clearInterval(moleTimerId);
-            moleTimerId = setInterval(randomMole, moleInterval);
+            moleTimerId = setInterval(randomMole, intervaloActual);
         }
     }
 
@@ -572,23 +598,7 @@ let evaluacionIntervalId = null;
         });
         randomMole();
 
-        // 🚀 Evaluación automática con IA cada 3 segundos
-evaluacionIntervalId = setInterval(() => {
-    if (!gameInProgress || juegoPausado) return;
 
-    const datos = generarDatosEvaluacion();
-
-    fetch('/api/evaluar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-    })
-    .then(res => res.json())
-    .then(respuesta => {
-        ajustarDificultadConIA(respuesta.velocidad_sugerida);
-    })
-    .catch(err => console.error('❌ Error al contactar IA:', err));
-}, 5000);
 
 
         // Inicia los ciclos del juego
