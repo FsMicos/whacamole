@@ -1,324 +1,580 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pégale al Topo - Inicio</title>
-  <!-- 1. Importar la fuente de Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  
-  <!-- 2. Enlazar el archivo CSS unificado -->
-  <link rel="stylesheet" href="/css/ui-styles.css"> 
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/help-style.css"> 
-  <link rel="stylesheet" href="/css/mute-button.css">
-</head>
-<body>
+  <!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pégale al Topo - Inicio</title>
+    <!-- 1. Importar la fuente de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- 2. Enlazar el archivo CSS unificado -->
+    <link rel="stylesheet" href="/css/ui-styles.css"> 
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/help-style.css"> 
+    <link rel="stylesheet" href="/css/mute-button.css">
 
-  <div id="player-info-overlay">
-    <div class="registration-form">
-      <div class="registration-title">REGISTRO</div>
-      
-      <label class="form-label" for="player-name">Nombre (4 letras):</label>
-      <input type="text" id="player-name" class="form-input" maxlength="4" placeholder="NICK">
-      
-      <label class="form-label" for="player-age">Edad:</label>
-      <input type="number" id="player-age" class="form-input" min="1" max="120" placeholder="25">
-      
-      <button id="start-button" class="continue-button">CONTINUAR</button>
-    </div>
-  </div>
-  <!-- 3. Usar el contenedor wrapper para centrar el contenido -->
-  <div class="home-panel-wrapper">
-      <!-- Título con estilos de ui-panel -->
-      <div class="ui-panel title-panel">PEGALE AL TOPO</div>
-
-      <div class="ui-panel player-info-panel" id="player-info" style="display: none;">
-        Jugador: <span id="player-name-display"></span>
-      </div>
-      
-      <!-- Botón de Jugar como un enlace con estilos de ui-panel -->
-      <a href="/game" class="ui-panel button-panel"><svg width="30" height="28" viewBox="0 0 30 28" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_123_41)">
-            <path
-              d="M27.8484 10.9538C30.7172 12.5163 30.7172 15.4851 27.8484 17.0476L9.32379 27.1371C5.56732 29.1831 -1.51279e-07 27.3638 0 24.0902L9.32554e-07 3.91117C1.08384e-06 0.637638 5.56732 -1.18167 9.32379 0.864303L27.8484 10.9538Z"
-              fill="#5A3E2B" />
-          </g>
-          <defs>
-            <clipPath id="clip0_123_41">
-              <rect width="30" height="28" fill="white" />
-            </clipPath>
-          </defs>
-        </svg>
-        JUGAR</a>
-      
-      <!-- Botón de Records como un enlace con estilos de ui-panel -->
-      <a href="/leaderboard" class="ui-panel button-panel"><svg width="21" height="23" viewBox="0 0 21 23" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_135_8)">
-            <path
-              d="M9.06508 1.17079C9.51673 -0.390265 11.4833 -0.390264 11.935 1.17079L13.3793 6.16295C13.5813 6.8611 14.1606 7.33377 14.8142 7.33377H19.4883C20.9499 7.33377 21.5576 9.43416 20.3752 10.3989L16.5938 13.4843C16.0649 13.9157 15.8437 14.6805 16.0457 15.3786L17.49 20.3708C17.9417 21.9319 16.3507 23.23 15.1683 22.2652L11.3869 19.1799C10.858 18.7484 10.142 18.7484 9.61315 19.1799L5.83174 22.2652C4.64929 23.23 3.05832 21.9319 3.50997 20.3708L4.95434 15.3786C5.15633 14.6805 4.93507 13.9157 4.40623 13.4843L0.624834 10.3989C-0.557619 9.43416 0.0500828 7.33377 1.51167 7.33377H6.18577C6.83941 7.33377 7.41872 6.8611 7.62068 6.16295L9.06508 1.17079Z"
-              fill="#5A3E2B" />
-          </g>
-          <defs>
-            <clipPath id="clip0_135_8">
-              <rect width="21" height="23" fill="white" />
-            </clipPath>
-          </defs>
-        </svg>
-        RECORDS</a>
-  </div>
-   <a href="/help" class="help-button">?</a>
-   <button class="mute-button" id="muteButton">🔊</button>
-   
-   <script>
-    // Sistema de control global de música integrado
-    class GlobalMusicControl {
-      constructor() {
-        this.isMuted = localStorage.getItem('musicMuted') === 'true';
-        this.audioElements = [];
-        this.defaultVolume = 1;
+    <!-- 3. Estilos para el toggle de IA -->
+    <style>
+      /* Estilos para el panel de IA */
+      .ia-panel {
+        margin-top: 15px !important;
+        padding: 20px !important;
+        background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+        border: 3px solid #3498db !important;
+        position: relative;
+        overflow: hidden;
       }
 
-      registerAudio(audioElement, volume = 1) {
-        audioElement.defaultVolume = volume;
-        this.audioElements.push(audioElement);
+      .ia-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.2), transparent);
+        animation: iaGlow 3s infinite;
+      }
+
+      @keyframes iaGlow {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: -100%; }
+      }
+
+      .ia-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .ia-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: #3498db;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+      }
+
+      .ia-description {
+        font-size: 8px;
+        color: #bdc3c7;
+        text-align: center;
+        margin-bottom: 15px;
+        line-height: 1.3;
+      }
+
+      .ia-toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .ia-toggle {
+        width: 60px;
+        height: 30px;
+        background: #e74c3c;
+        border-radius: 15px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #c0392b;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+      }
+
+      .ia-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 15px rgba(52, 152, 219, 0.3);
+      }
+
+      .ia-toggle.active {
+        background: #27ae60;
+        border-color: #229954;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 15px rgba(39, 174, 96, 0.4);
+      }
+
+      .ia-toggle-slider {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      }
+
+      .ia-toggle.active .ia-toggle-slider {
+        transform: translateX(30px);
+        background: #ecf0f1;
+      }
+
+      .ia-status {
+        font-size: 10px;
+        font-weight: bold;
+        color: #e74c3c;
+        transition: all 0.3s ease;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        min-width: 120px;
+        text-align: center;
+      }
+
+      /* Animación de activación */
+      .ia-toggle.active .ia-toggle-slider {
+        animation: toggleBounce 0.6s ease;
+      }
+
+      @keyframes toggleBounce {
+        0% { transform: translateX(0px); }
+        50% { transform: translateX(35px) scale(1.1); }
+        100% { transform: translateX(30px); }
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .ia-panel {
+          padding: 15px !important;
+        }
         
-        // Aplicar estado actual
-        if (this.isMuted) {
-          audioElement.volume = 0;
-        } else {
-          audioElement.volume = volume;
+        .ia-title {
+          font-size: 12px;
+        }
+        
+        .ia-description {
+          font-size: 7px;
+        }
+        
+        .ia-toggle-container {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .ia-status {
+          font-size: 9px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="player-info-overlay">
+      <div class="registration-form">
+        <div class="registration-title">REGISTRO</div>
+        
+        <label class="form-label" for="player-name">Nombre (4 letras):</label>
+        <input type="text" id="player-name" class="form-input" maxlength="4" placeholder="NICK">
+        
+        <label class="form-label" for="player-age">Edad:</label>
+        <input type="number" id="player-age" class="form-input" min="1" max="120" placeholder="25">
+        
+        <button id="start-button" class="continue-button">CONTINUAR</button>
+      </div>
+    </div>
+
+    <!-- 3. Usar el contenedor wrapper para centrar el contenido -->
+    <div class="home-panel-wrapper">
+        <!-- Título con estilos de ui-panel -->
+        <div class="ui-panel title-panel">PEGALE AL TOPO</div>
+
+        <div class="ui-panel player-info-panel" id="player-info" style="display: none;">
+          Jugador: <span id="player-name-display"></span>
+        </div>
+        
+        <!-- Botón de Jugar como un enlace con estilos de ui-panel -->
+        <a href="/game" class="ui-panel button-panel">
+          <svg width="30" height="28" viewBox="0 0 30 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_123_41)">
+              <path d="M27.8484 10.9538C30.7172 12.5163 30.7172 15.4851 27.8484 17.0476L9.32379 27.1371C5.56732 29.1831 -1.51279e-07 27.3638 0 24.0902L9.32554e-07 3.91117C1.08384e-06 0.637638 5.56732 -1.18167 9.32379 0.864303L27.8484 10.9538Z" fill="#5A3E2B" />
+            </g>
+            <defs>
+              <clipPath id="clip0_123_41">
+                <rect width="30" height="28" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          JUGAR
+        </a>
+        
+        <!-- Botón de Records como un enlace con estilos de ui-panel -->
+        <a href="/leaderboard" class="ui-panel button-panel">
+          <svg width="21" height="23" viewBox="0 0 21 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_135_8)">
+              <path d="M9.06508 1.17079C9.51673 -0.390265 11.4833 -0.390264 11.935 1.17079L13.3793 6.16295C13.5813 6.8611 14.1606 7.33377 14.8142 7.33377H19.4883C20.9499 7.33377 21.5576 9.43416 20.3752 10.3989L16.5938 13.4843C16.0649 13.9157 15.8437 14.6805 16.0457 15.3786L17.49 20.3708C17.9417 21.9319 16.3507 23.23 15.1683 22.2652L11.3869 19.1799C10.858 18.7484 10.142 18.7484 9.61315 19.1799L5.83174 22.2652C4.64929 23.23 3.05832 21.9319 3.50997 20.3708L4.95434 15.3786C5.15633 14.6805 4.93507 13.9157 4.40623 13.4843L0.624834 10.3989C-0.557619 9.43416 0.0500828 7.33377 1.51167 7.33377H6.18577C6.83941 7.33377 7.41872 6.8611 7.62068 6.16295L9.06508 1.17079Z" fill="#5A3E2B" />
+            </g>
+            <defs>
+              <clipPath id="clip0_135_8">
+                <rect width="21" height="23" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          RECORDS
+        </a>
+
+        <!-- 🤖 PANEL DE IA - AQUÍ ESTÁ EL TOGGLE INTEGRADO -->
+        <div class="ui-panel ia-panel" id="ia-panel" style="display: none;">
+          <div class="ia-content">
+            <div class="ia-title">🤖 INTELIGENCIA ARTIFICIAL</div>
+            <div class="ia-description">Adapta la dificultad según tu rendimiento</div>
+            
+            <div class="ia-toggle-container">
+              <div class="ia-toggle" id="ia-toggle" onclick="toggleIA()">
+                <div class="ia-toggle-slider"></div>
+              </div>
+              <div class="ia-status" id="ia-status">IA DESACTIVADA</div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    
+    <a href="/help" class="help-button">?</a>
+    <button class="mute-button" id="muteButton">🔊</button>
+    
+    <script>
+      // ========================================
+      // 🤖 FUNCIONES DEL TOGGLE DE IA
+      // ========================================
+      
+      // Función para inicializar el estado del toggle desde localStorage
+      function initializeIAToggle() {
+        const iaActivada = localStorage.getItem('iaActivada') === 'true';
+        const toggle = document.getElementById('ia-toggle');
+        const status = document.getElementById('ia-status');
+        
+        if (toggle && status) {
+          if (iaActivada) {
+            toggle.classList.add('active');
+            status.textContent = 'IA ACTIVADA';
+            status.style.color = '#27ae60';
+          } else {
+            toggle.classList.remove('active');
+            status.textContent = 'IA DESACTIVADA';
+            status.style.color = '#e74c3c';
+          }
+        }
+        
+        console.log(`🤖 Toggle IA inicializado: ${iaActivada ? 'ACTIVADA' : 'DESACTIVADA'}`);
+      }
+
+      // Función global para toggle IA
+      function toggleIA() {
+        const currentState = localStorage.getItem('iaActivada') === 'true';
+        const newState = !currentState;
+        
+        localStorage.setItem('iaActivada', newState.toString());
+        
+        const toggle = document.getElementById('ia-toggle');
+        const status = document.getElementById('ia-status');
+        
+        if (toggle && status) {
+          if (newState) {
+            toggle.classList.add('active');
+            status.textContent = 'IA ACTIVADA';
+            status.style.color = '#27ae60';
+            console.log('🤖 IA ACTIVADA desde index.html');
+          } else {
+            toggle.classList.remove('active');
+            status.textContent = 'IA DESACTIVADA';
+            status.style.color = '#e74c3c';
+            console.log('🤖 IA DESACTIVADA desde index.html');
+          }
         }
       }
 
-      toggleMute() {
-        this.isMuted = !this.isMuted;
-        localStorage.setItem('musicMuted', this.isMuted.toString());
-        
-        // Actualizar todos los audios
-        this.audioElements.forEach(audio => {
+      // ========================================
+      // SISTEMA DE CONTROL GLOBAL DE MÚSICA
+      // ========================================
+      class GlobalMusicControl {
+        constructor() {
+          this.isMuted = localStorage.getItem('musicMuted') === 'true';
+          this.audioElements = [];
+          this.defaultVolume = 1;
+        }
+
+        registerAudio(audioElement, volume = 1) {
+          audioElement.defaultVolume = volume;
+          this.audioElements.push(audioElement);
+          
+          // Aplicar estado actual
           if (this.isMuted) {
-            audio.volume = 0;
+            audioElement.volume = 0;
           } else {
-            audio.volume = audio.defaultVolume || 1;
+            audioElement.volume = volume;
+          }
+        }
+
+        toggleMute() {
+          this.isMuted = !this.isMuted;
+          localStorage.setItem('musicMuted', this.isMuted.toString());
+          
+          // Actualizar todos los audios
+          this.audioElements.forEach(audio => {
+            if (this.isMuted) {
+              audio.volume = 0;
+            } else {
+              audio.volume = audio.defaultVolume || 1;
+            }
+          });
+          
+          // Actualizar botón
+          this.updateButton();
+          
+          // Notificar a otras páginas/scripts
+          window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
+            detail: { isMuted: this.isMuted } 
+          }));
+        }
+
+        updateButton() {
+          const button = document.getElementById('muteButton');
+          if (button) {
+            if (this.isMuted) {
+              button.textContent = '🔇';
+              button.classList.add('muted');
+            } else {
+              button.textContent = '🔊';
+              button.classList.remove('muted');
+            }
+          }
+        }
+
+        setupButton() {
+          const button = document.getElementById('muteButton');
+          if (button) {
+            this.updateButton();
+            button.addEventListener('click', () => this.toggleMute());
+          }
+        }
+      }
+
+      // Crear instancia global
+      window.globalMusicControl = new GlobalMusicControl();
+
+      document.addEventListener('DOMContentLoaded', () => {
+        // ========================================
+        // CONFIGURACIÓN INICIAL
+        // ========================================
+        
+        // Configurar el botón de silenciar
+        window.globalMusicControl.setupButton();
+
+        // Background music setup
+        const backgroundMusic = new Audio('/media/solitario.mp3');
+        backgroundMusic.loop = true;
+        backgroundMusic.preload = 'auto';
+        
+        // Registrar audio con el sistema global
+        window.globalMusicControl.registerAudio(backgroundMusic, 1);
+
+        // Variable de control para inicio de música
+        let musicStarted = false;
+        
+        function startMusic() {
+          if (!musicStarted) {
+            backgroundMusic.play().catch(error => {
+              console.log('Music playback failed:', error);
+            });
+            musicStarted = true;
+          }
+        }
+
+        // Event listeners para iniciar música con interacción del usuario
+        document.addEventListener('click', startMusic, { once: true });
+        document.addEventListener('keydown', startMusic, { once: true });
+        document.addEventListener('touchstart', startMusic, { once: true });
+
+        // Funcionalidad de tecla M
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'm' || e.key === 'M') {
+            window.globalMusicControl.toggleMute();
           }
         });
+
+        // ========================================
+        // SISTEMA DE REGISTRO DE JUGADOR
+        // ========================================
         
-        // Actualizar botón
-        this.updateButton();
-        
-        // Notificar a otras páginas/scripts
-        window.dispatchEvent(new CustomEvent('globalMuteToggled', { 
-          detail: { isMuted: this.isMuted } 
-        }));
-      }
+        let playerRegistered = false;
+        let playerData = {
+          name: '',
+          age: 0
+        };
 
-      updateButton() {
-        const button = document.getElementById('muteButton');
-        if (button) {
-          if (this.isMuted) {
-            button.textContent = '🔇';
-            button.classList.add('muted');
-          } else {
-            button.textContent = '🔊';
-            button.classList.remove('muted');
+        // Referencias a elementos del DOM 
+        const registrationOverlay = document.getElementById('player-info-overlay');
+        const startRegistrationButton = document.getElementById('start-button');
+        const playerNameInput = document.getElementById('player-name');
+        const playerAgeInput = document.getElementById('player-age');
+        const playerInfo = document.getElementById('player-info');
+        const playerNameDisplay = document.getElementById('player-name-display');
+        const playButton = document.querySelector('a[href="/game"]');
+        const iaPanel = document.getElementById('ia-panel');
+
+        if (!registrationOverlay || !startRegistrationButton || !playerNameInput || !playerAgeInput) {
+          console.error('Error: No se pudieron encontrar todos los elementos del DOM necesarios');
+          return;
+        }
+
+        // Función para validar los datos del formulario
+        function validateRegistration() {
+          const name = playerNameInput.value.trim().toUpperCase();
+          const age = parseInt(playerAgeInput.value);
+
+          if (name.length !== 4) {
+            alert('El nombre debe tener exactamente 4 letras');
+            return false;
           }
-        }
-      }
 
-      setupButton() {
-        const button = document.getElementById('muteButton');
-        if (button) {
-          this.updateButton();
-          button.addEventListener('click', () => this.toggleMute());
-        }
-      }
-    }
-
-    // Crear instancia global
-    window.globalMusicControl = new GlobalMusicControl();
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Configurar el botón de silenciar
-      window.globalMusicControl.setupButton();
-
-      // Background music setup
-      const backgroundMusic = new Audio('/media/solitario.mp3');
-      backgroundMusic.loop = true;
-      backgroundMusic.preload = 'auto';
-      
-      // Registrar audio con el sistema global
-      window.globalMusicControl.registerAudio(backgroundMusic, 1);
-
-      // Variable de control para inicio de música
-      let musicStarted = false;
-      
-      function startMusic() {
-        if (!musicStarted) {
-          backgroundMusic.play().catch(error => {
-            console.log('Music playback failed:', error);
-          });
-          musicStarted = true;
-        }
-      }
-
-      // Event listeners para iniciar música con interacción del usuario
-      document.addEventListener('click', startMusic, { once: true });
-      document.addEventListener('keydown', startMusic, { once: true });
-      document.addEventListener('touchstart', startMusic, { once: true });
-
-      // Funcionalidad de tecla M
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'm' || e.key === 'M') {
-          window.globalMusicControl.toggleMute();
-        }
-      });
-
-      let playerRegistered = false;
-      let playerData = {
-        name: '',
-        age: 0
-      };
-
-      // Referencias a elementos del DOM 
-      const registrationOverlay = document.getElementById('player-info-overlay');
-      const startRegistrationButton = document.getElementById('start-button');
-      const playerNameInput = document.getElementById('player-name');
-      const playerAgeInput = document.getElementById('player-age');
-      const playerInfo = document.getElementById('player-info');
-      const playerNameDisplay = document.getElementById('player-name-display');
-      const playButton = document.querySelector('a[href="/game"]');
-
-      if (!registrationOverlay || !startRegistrationButton || !playerNameInput || !playerAgeInput) {
-        console.error('Error: No se pudieron encontrar todos los elementos del DOM necesarios');
-        return;
-      }
-
-      // === LÓGICA DEL SISTEMA DE REGISTRO ===
-
-      // Función para validar los datos del formulario
-      function validateRegistration() {
-        const name = playerNameInput.value.trim().toUpperCase();
-        const age = parseInt(playerAgeInput.value);
-
-        if (name.length !== 4) {
-          alert('El nombre debe tener exactamente 4 letras');
-          return false;
-        }
-
-        if (isNaN(age) || age < 1 || age > 120) {
-          alert('La edad debe ser un número entre 1 y 120');
-          return false;
-        }
-
-        return true;
-      }
-
-      // Función para completar el registro
-      function completeRegistration() {
-        if (validateRegistration()) {
-          playerData.name = playerNameInput.value.trim().toUpperCase();
-          playerData.age = parseInt(playerAgeInput.value);
-          
-          // Guardar en sessionStorage para acceso desde otras páginas (solo durante la sesión)
-          sessionStorage.setItem('playerData', JSON.stringify(playerData));
-          
-          // Mostrar información del jugador
-          playerNameDisplay.textContent = playerData.name;
-          playerInfo.style.display = 'block';
-                    
-           if (registrationOverlay) {
-            registrationOverlay.classList.add('hidden');
-            console.log('Overlay ocultado');
-          } else {
-            console.error('No se pudo encontrar el overlay de registro');
+          if (isNaN(age) || age < 1 || age > 120) {
+            alert('La edad debe ser un número entre 1 y 120');
+            return false;
           }
-          
-          playerRegistered = true;
-          
-          console.log('Jugador registrado:', playerData);
+
+          return true;
         }
-      }
 
-      // Event listeners para el formulario de registro
-      startRegistrationButton.addEventListener('click', completeRegistration);
-
-      // Permitir registro con Enter
-      playerNameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          playerAgeInput.focus();
-        }
-      });
-
-      playerAgeInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          completeRegistration();
-        }
-      });
-
-      // Convertir automáticamente el nombre a mayúsculas
-      playerNameInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.toUpperCase();
-      });
-
-      // Prevenir navegación al juego si no está registrado
-      playButton.addEventListener('click', (e) => {
-        if (!playerRegistered) {
-          e.preventDefault();
-          alert('Debes registrarte antes de jugar');
-        }
-      });
-
-      // === VERIFICAR REGISTRO EN SESSIONSTORAGE ===
-      
-      // Verificar si hay datos de jugador en la sesión actual
-      const savedPlayerData = sessionStorage.getItem('playerData');
-      if (savedPlayerData) {
-        try {
-          const parsedData = JSON.parse(savedPlayerData);
-          if (parsedData.name && parsedData.age) {
-            playerData = parsedData;
+        // Función para completar el registro
+        function completeRegistration() {
+          if (validateRegistration()) {
+            playerData.name = playerNameInput.value.trim().toUpperCase();
+            playerData.age = parseInt(playerAgeInput.value);
+            
+            // Guardar en sessionStorage para acceso desde otras páginas (solo durante la sesión)
+            sessionStorage.setItem('playerData', JSON.stringify(playerData));
+            
+            // Mostrar información del jugador
             playerNameDisplay.textContent = playerData.name;
             playerInfo.style.display = 'block';
-            registrationOverlay.classList.add('hidden');
+            
+            // 🤖 MOSTRAR PANEL DE IA DESPUÉS DEL REGISTRO
+            if (iaPanel) {
+              iaPanel.style.display = 'block';
+              initializeIAToggle();
+              console.log('🤖 Panel de IA mostrado después del registro');
+            }
+                      
+            if (registrationOverlay) {
+              registrationOverlay.classList.add('hidden');
+              console.log('Overlay ocultado');
+            } else {
+              console.error('No se pudo encontrar el overlay de registro');
+            }
+            
             playerRegistered = true;
-            console.log('Jugador cargado desde sessionStorage:', playerData);
+            
+            console.log('Jugador registrado:', playerData);
+            
+            // Determinar categoría para mostrar en consola
+            let categoria;
+            if (playerData.age >= 4 && playerData.age <= 10) categoria = 'Niños (4-10)';
+            else if (playerData.age >= 11 && playerData.age <= 17) categoria = 'Jóvenes (11-17)';
+            else categoria = 'Adultos (18+)';
+            
+            console.log(`📊 Jugador clasificado en categoría: ${categoria}`);
           }
-        } catch (error) {
-          console.log('Error al cargar datos del jugador:', error);
-          sessionStorage.removeItem('playerData');
         }
-      } else {
-        // Si no hay datos en sessionStorage, mostrar el registro
-        registrationOverlay.classList.remove('hidden');
-        playerInfo.style.display = 'none';
-        console.log('No hay registro en la sesión - Usuario debe registrarse');
-      }
 
-      // Función global para obtener datos del jugador (accesible desde game.js)
-      window.getPlayerData = function() {
-        return playerData;
-      };
+        // Event listeners para el formulario de registro
+        startRegistrationButton.addEventListener('click', completeRegistration);
 
-      // Función global para verificar si el jugador está registrado
-      window.isPlayerRegistered = function() {
-        return playerRegistered;
-      };
+        // Permitir registro con Enter
+        playerNameInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            playerAgeInput.focus();
+          }
+        });
 
-      // Función global para limpiar registro (útil para logout)
-      window.clearPlayerRegistration = function() {
-        sessionStorage.removeItem('playerData');
-        playerRegistered = false;
-        playerData = { name: '', age: 0 };
-        playerInfo.style.display = 'none';
-        registrationOverlay.classList.remove('hidden');
-      };
+        playerAgeInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            completeRegistration();
+          }
+        });
 
-    });
-   </script>
-</body>
-</html>
+        // Convertir automáticamente el nombre a mayúsculas
+        playerNameInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Prevenir navegación al juego si no está registrado
+        playButton.addEventListener('click', (e) => {
+          if (!playerRegistered) {
+            e.preventDefault();
+            alert('Debes registrarte antes de jugar');
+          }
+        });
+
+        // ========================================
+        // VERIFICAR REGISTRO EN SESSIONSTORAGE
+        // ========================================
+        
+        // Verificar si hay datos de jugador en la sesión actual
+        const savedPlayerData = sessionStorage.getItem('playerData');
+        if (savedPlayerData) {
+          try {
+            const parsedData = JSON.parse(savedPlayerData);
+            if (parsedData.name && parsedData.age) {
+              playerData = parsedData;
+              playerNameDisplay.textContent = playerData.name;
+              playerInfo.style.display = 'block';
+              
+              // 🤖 MOSTRAR PANEL DE IA SI YA HAY DATOS GUARDADOS
+              if (iaPanel) {
+                iaPanel.style.display = 'block';
+                initializeIAToggle();
+              }
+              
+              registrationOverlay.classList.add('hidden');
+              playerRegistered = true;
+              console.log('Jugador cargado desde sessionStorage:', playerData);
+              
+              // Mostrar categoría en consola
+              let categoria;
+              if (playerData.age >= 4 && playerData.age <= 10) categoria = 'Niños (4-10)';
+              else if (playerData.age >= 11 && playerData.age <= 17) categoria = 'Jóvenes (11-17)';
+              else categoria = 'Adultos (18+)';
+              
+              console.log(`📊 Jugador clasificado en categoría: ${categoria}`);
+            }
+          } catch (error) {
+            console.log('Error al cargar datos del jugador:', error);
+            sessionStorage.removeItem('playerData');
+          }
+        } else {
+          // Si no hay datos en sessionStorage, mostrar el registro
+          registrationOverlay.classList.remove('hidden');
+          playerInfo.style.display = 'none';
+          if (iaPanel) iaPanel.style.display = 'none';
+          console.log('No hay registro en la sesión - Usuario debe registrarse');
+        }
+
+        // ========================================
+        // FUNCIONES GLOBALES
+        // ========================================
+        
+        // Función global para obtener datos del jugador (accesible desde game.js)
+        window.getPlayerData = function() {
+          return playerData;
+        };
+
+        // Función global para verificar si el jugador está registrado
+        window.isPlayerRegistered = function() {
+          return playerRegistered;
+        };
+
+        // Función global para limpiar registro (útil para logout)
+        window.clearPlayerRegistration = function() {
+          sessionStorage.removeItem('playerData');
+          playerRegistered = false;
+          playerData = { name: '', age: 0 };
+          playerInfo.style.display = 'none';
+          if (iaPanel) iaPanel.style.display = 'none';
+          registrationOverlay.classList.remove('hidden');
+        };
+
+      });
+    </script>
+  </body>
+  </html>
