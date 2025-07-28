@@ -9,9 +9,189 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="/js/global-music-control.js"></script>
+
+  <!-- 🆕 ESTILOS MEJORADOS PARA EL PANEL DE IA EN RESULTADOS -->
+  <style>
+    /* Panel IA en pantalla de resultados */
+    .game-over-ia-panel {
+      margin: 20px 0 !important;
+      padding: 15px !important;
+      background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+      border: 2px solid #3498db !important;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-over-ia-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.2), transparent);
+      animation: iaGlow 3s infinite;
+    }
+
+    @keyframes iaGlow {
+      0% { left: -100%; }
+      50% { left: 100%; }
+      100% { left: -100%; }
+    }
+
+    .game-over-ia-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .game-over-ia-title {
+      font-size: 11px;
+      margin-bottom: 8px;
+      color: #3498db;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    }
+
+    .game-over-ia-description {
+      font-size: 7px;
+      color: #bdc3c7;
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .game-over-ia-toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .game-over-ia-toggle {
+      width: 50px;
+      height: 25px;
+      background: #e74c3c;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #c0392b;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .game-over-ia-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .game-over-ia-toggle.active {
+      background: #27ae60;
+      border-color: #229954;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 15px rgba(39, 174, 96, 0.4);
+    }
+
+    .game-over-ia-toggle-slider {
+      width: 19px;
+      height: 19px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .game-over-ia-toggle.active .game-over-ia-toggle-slider {
+      transform: translateX(25px);
+      background: #ecf0f1;
+    }
+
+    .game-over-ia-status {
+      font-size: 8px;
+      font-weight: bold;
+      color: #e74c3c;
+      transition: all 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .game-over-ia-toggle.active + .game-over-ia-status {
+      color: #27ae60;
+    }
+
+    /* Animación de activación */
+    .game-over-ia-toggle.active .game-over-ia-toggle-slider {
+      animation: toggleBounce 0.6s ease;
+    }
+
+    @keyframes toggleBounce {
+      0% { transform: translateX(0px); }
+      50% { transform: translateX(30px) scale(1.1); }
+      100% { transform: translateX(25px); }
+    }
+
+    /* Responsive para móviles */
+    @media (max-width: 480px) {
+      .game-over-ia-panel {
+        padding: 12px !important;
+      }
+      
+      .game-over-ia-title {
+        font-size: 10px;
+      }
+      
+      .game-over-ia-description {
+        font-size: 6px;
+      }
+      
+      .game-over-ia-toggle-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .game-over-ia-status {
+        font-size: 7px;
+      }
+    }
+
+    /* 🆕 Botón de silenciar global */
+    .mute-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(90, 62, 43, 0.9);
+      color: white;
+      border: 2px solid #8B4513;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-family: 'Press Start 2P';
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .mute-button:hover {
+      background: rgba(90, 62, 43, 1);
+      transform: scale(1.05);
+    }
+
+    .mute-button.muted {
+      background: rgba(231, 76, 60, 0.9);
+      border-color: #c0392b;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Botón de silenciar global -->
+  <button class="mute-button" id="muteButton">🔊</button>
+
+  <!-- Header y elementos del juego existentes -->
   <header>
     <div>
       <button class="pause-button"> <svg width="24" height="23" viewBox="0 0 24 23" fill="none"
@@ -44,11 +224,11 @@
     <h2>Puntuación:<span id="score">0</span></h2>
 
   </header>
+  
+  <!-- Overlay de pausa (existente) -->
   <div id="paused-overlay">
     <div id="alert-box-paused">
-      
-      <div class="ui-panel title-panel">PAUSA 
-      </div>
+      <div class="ui-panel title-panel">PAUSA</div>
       <button class="resume-button ui-panel button-panel"> <svg width="30" height="28" viewBox="0 0 30 28" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_123_41)">
@@ -85,15 +265,9 @@
         </svg>
         Volver al Inicio</button>
     </div>
-  </div> <!-- FORMULARIO DE GUARDAR PUNTUACIÓN -->
-  <div id="save-score-overlay">
-    <h2>¡Juego Terminado!</h2>
-    <p>Ingresa tu nick (4 letras):</p>
-    <input type="text" id="nickname-input" maxlength="4">
-    <button id="save-score-button" class="ui-panel button-panel">Guardar Puntuación</button>
   </div>
 
-  <!-- PANTALLA FINAL DE PARTIDA -->
+  <!-- 🆕 PANTALLA FINAL DE PARTIDA CON PANEL IA FUNCIONAL -->
   <div id="game-over-overlay">
     <div id="alert-box-game-over">
       <div class="ui-panel title-panel">FINAL PARTIDA</div>
@@ -111,7 +285,24 @@
           <div class="stat-label">Fallos</div>
           <div class="stat-value" id="final-misses">0</div>
         </div>
-      </div>      <div class="final-buttons-container">
+      </div>
+
+      <!-- 🆕 PANEL DE IA PARA LA PRÓXIMA PARTIDA CON FUNCIONALIDAD -->
+      <div class="game-over-ia-panel" id="game-over-ia-panel">
+        <div class="game-over-ia-content">
+          <div class="game-over-ia-title">🤖 IA PARA PRÓXIMA PARTIDA</div>
+          <div class="game-over-ia-description">Configurar adaptación inteligente con progresión gradual</div>
+          
+          <div class="game-over-ia-toggle-container">
+            <div class="game-over-ia-toggle" id="game-over-ia-toggle" onclick="toggleGameOverIA()">
+              <div class="game-over-ia-toggle-slider"></div>
+            </div>
+            <div class="game-over-ia-status" id="game-over-ia-status">IA DESACTIVADA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="final-buttons-container">
         <button class="game-over-restart-button ui-panel button-panel"> <svg width="36" height="32" viewBox="0 0 36 32" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_123_30)">
@@ -135,16 +326,83 @@
     </div>
   </div>
 
+  <!-- Grid del juego (existente) -->
   <div class="grid">
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
-    <div class="hole"><div class="mole normal"></div></div>
+    <div class="hole amarillo"><div class="mole normal"></div></div>
+    <div class="hole amarillo"><div class="mole normal"></div></div>
+    <div class="hole azul"><div class="mole normal"></div></div>
+    <div class="hole azul"><div class="mole normal"></div></div>
+    <div class="hole rosado"><div class="mole normal"></div></div>
+    <div class="hole rosado"><div class="mole normal"></div></div>
+    <div class="hole verde"><div class="mole normal"></div></div>
+    <div class="hole verde"><div class="mole normal"></div></div>
   </div>
+
+  <!-- 🆕 Script JavaScript inline para el toggle IA -->
+  <script>
+    // Función para toggle IA en pantalla de resultados
+    function toggleGameOverIA() {
+      const currentState = localStorage.getItem('iaActivada') === 'true';
+      const newState = !currentState;
+      
+      localStorage.setItem('iaActivada', newState.toString());
+      
+      const toggle = document.getElementById('game-over-ia-toggle');
+      const status = document.getElementById('game-over-ia-status');
+      
+      if (toggle && status) {
+        if (newState) {
+          toggle.classList.add('active');
+          status.textContent = 'IA ACTIVADA';
+          status.style.color = '#27ae60';
+          console.log('🤖 IA ACTIVADA para próxima partida desde pantalla de resultados');
+        } else {
+          toggle.classList.remove('active');
+          status.textContent = 'IA DESACTIVADA';
+          status.style.color = '#e74c3c';
+          console.log('🤖 IA DESACTIVADA para próxima partida desde pantalla de resultados');
+        }
+      }
+      
+      // Mostrar notificación temporal
+      mostrarNotificacionTemporalIA(newState ? 'IA ACTIVADA para próxima partida' : 'IA DESACTIVADA para próxima partida');
+    }
+    
+    // Función para mostrar notificación temporal
+    function mostrarNotificacionTemporalIA(mensaje) {
+      let notification = document.getElementById('temp-ia-notification');
+      if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'temp-ia-notification';
+        notification.style.cssText = `
+          position: fixed;
+          top: 100px;
+          right: 20px;
+          background: rgba(52, 152, 219, 0.95);
+          color: white;
+          padding: 12px 18px;
+          border-radius: 8px;
+          font-family: 'Press Start 2P';
+          font-size: 9px;
+          z-index: 1001;
+          border: 2px solid #2980b9;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          transition: opacity 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+      }
+      
+      notification.textContent = `🤖 ${mensaje}`;
+      notification.style.opacity = '1';
+      
+      setTimeout(() => {
+        if (notification) {
+          notification.style.opacity = '0';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 2500);
+    }
+  </script>
 
   <script src="/JS/game.js"></script>
 </body>

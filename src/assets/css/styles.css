@@ -147,31 +147,95 @@ p {
 }
 
 /* === 3. CUADRÍCULA DEL JUEGO === */
+/* === 3. CUADRÍCULA DEL JUEGO === */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  /* Usamos las dimensiones de la imagen del agujero para calcular el gap */
+  /* CAMBIADO: Nueva estructura de columnas para crear separación */
+  grid-template-columns: repeat(2, 1fr) 150px repeat(2, 1fr); /* 2 agujeros + espacio + 2 agujeros */
+  grid-template-rows: repeat(2, 1fr); /* 2 filas */
+  
+  /* Mantén tu gap original */
   gap: 30px; 
   padding: 20px;
   margin-bottom: 5vh;
-  /* Empujamos la cuadrícula hacia abajo usando un margen superior automático */
-  margin-top: auto; 
+  margin-top: auto;
+  
+  /* Para centrar el grid completo */
+  justify-content: center;
+  align-items: center;
 }
 
+/* NUEVO: Posicionamiento específico de cada agujero */
+.grid .hole:nth-child(1) { grid-area: 1 / 1; } /* Fila 1, Columna 1 */
+.grid .hole:nth-child(2) { grid-area: 1 / 2; } /* Fila 1, Columna 2 */
+.grid .hole:nth-child(3) { grid-area: 1 / 4; } /* Fila 1, Columna 4 (salta la 3) */
+.grid .hole:nth-child(4) { grid-area: 1 / 5; } /* Fila 1, Columna 5 */
+.grid .hole:nth-child(5) { grid-area: 2 / 1; } /* Fila 2, Columna 1 */
+.grid .hole:nth-child(6) { grid-area: 2 / 2; } /* Fila 2, Columna 2 */
+.grid .hole:nth-child(7) { grid-area: 2 / 4; } /* Fila 2, Columna 4 (salta la 3) */
+.grid .hole:nth-child(8) { grid-area: 2 / 5; } /* Fila 2, Columna 5 */
+
+
+
 /* === 4. ESTILOS DEL AGUJERO === */
+/* TUS ESTILOS ORIGINALES SE MANTIENEN IGUAL */
 .hole {
- 
   width: 250px;
   height: 108px;
   
-  background-image: url('/img/agujero.png'); /* Ruta a tu imagen del agujero */
-  background-size: 250px 108px; /* 'contain' asegura que la imagen completa quepa dentro del div */
+  background-image: url('/img/agujero.png');
+  background-size: 250px 108px;
   background-repeat: no-repeat;
   background-position: center;
-  position: relative; /* Necesario para que el topo se posicione dentro del agujero */
-  overflow: hidden; /* Oculta al topo cuando está "debajo" */
+  position: relative;
+  overflow: hidden;
 }
 
+/* Colores para los agujeros */
+.hole.amarillo { background-image: url('/img/agujero_amarillo.png'); }
+.hole.azul    { background-image: url('/img/agujero_azul.png'); }
+.hole.rosado  { background-image: url('/img/agujero_rosado.png'); }
+.hole.verde   { background-image: url('/img/agujero_verde.png'); }
+
+/* Asegura que el tamaño y repeat ya definidos antes se apliquen — no es necesario repetirlos */
+
+
+
+/* RESPONSIVE: Ajustes para pantallas más pequeñas */
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 120px repeat(2, 1fr);
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 80px repeat(2, 1fr);
+    gap: 20px;
+    padding: 15px;
+  }
+  
+  .hole {
+    width: 200px;
+    height: 86px;
+    background-size: 200px 86px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) 60px repeat(2, 1fr);
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .hole {
+    width: 150px;
+    height: 65px;
+    background-size: 150px 65px;
+  }
+}
 /* ESTILOS DEL TOPO === */
 .mole {
   width: 150px; /* Width of a single frame */
@@ -444,4 +508,259 @@ p {
         inset 0 6px 0 rgba(0, 0, 0, 0.3),
         inset 0 -6px 0 rgba(255, 255, 255, 0.2);
 }
+#player-info-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.9) 100%);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-pixel);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    #player-info-overlay.hidden {
+      display: none !important;
+    }
+
+    .registration-form {
+      background: linear-gradient(135deg, #8c5a32 0%, #a66d3e 50%, #8c5a32 100%);
+      border: 6px solid #4a2d14;
+      border-radius: 20px;
+      padding: 40px 50px;
+      box-shadow: 
+        inset 0 8px 0 rgba(255,255,255,0.4),
+        inset 0 -8px 0 rgba(0,0,0,0.4),
+        0 20px 30px rgba(0,0,0,0.6),
+        0 0 0 2px rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      min-width: 400px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      animation: slideUp 0.5s ease-out 0.1s both;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Efecto de brillo sutil */
+    .registration-form::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255,255,255,0.1),
+        transparent
+      );
+      animation: shimmer 3s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      50% { transform: translateX(50%) translateY(50%) rotate(45deg); }
+      100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+    }
+
+    /* Título del panel */
+    .registration-title {
+      background: linear-gradient(135deg, #e7b624 0%, #f4d03f 50%, #e7b624 100%);
+      color: #4a2d14;
+      font-size: 1.8em;
+      padding: 20px 30px;
+      border: 4px solid #4a2d14;
+      border-radius: 15px;
+      box-shadow: 
+        inset 0 6px 0 rgba(255,255,255,0.6),
+        inset 0 -6px 0 rgba(0,0,0,0.3),
+        0 8px 0 rgba(0,0,0,0.3);
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+      position: relative;
+      font-family: var(--font-pixel);
+      text-transform: uppercase;
+    }
+
+    .registration-title::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, 
+        rgba(255,255,255,0.3) 0%, 
+        transparent 50%, 
+        rgba(255,255,255,0.1) 100%
+      );
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Labels */
+    .form-label {
+      font-family: var(--font-pixel);
+      text-transform: uppercase;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #f4d03f;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+      letter-spacing: 1px;
+    }
+
+    /* Inputs */
+    .form-input {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      padding: 15px;
+      border: 4px solid #4a2d14;
+      border-radius: 12px;
+      text-align: center;
+      background: linear-gradient(135deg, #f0e68c 0%, #f4d03f 100%);
+      color: #4a2d14;
+      box-shadow: 
+        inset 0 8px 0 rgba(255,255,255,0.6),
+        inset 0 -8px 0 rgba(0,0,0,0.2),
+        0 4px 0 rgba(0,0,0,0.3);
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+
+    .form-input:focus {
+      outline: none;
+      background: linear-gradient(135deg, #e7b624 0%, #f39c12 100%);
+      color: #2c1810;
+      box-shadow: 
+        inset 0 8px 0 rgba(255,255,255,0.7),
+        inset 0 -8px 0 rgba(0,0,0,0.2),
+        0 4px 0 rgba(0,0,0,0.3),
+        0 0 0 3px rgba(231, 182, 36, 0.5);
+      transform: scale(1.05);
+    }
+
+    .form-input::placeholder {
+      color: rgba(74, 45, 20, 0.6);
+      font-size: 14px;
+    }
+
+    /* Botón de continuar */
+    .continue-button {
+      background: linear-gradient(135deg, #f0e68c 0%, #f4d03f 50%, #e7b624 100%);
+      color: #4a2d14;
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      padding: 18px 25px;
+      border: 4px solid #4a2d14;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 
+        inset 0 6px 0 rgba(255,255,255,0.6),
+        inset 0 -6px 0 rgba(0,0,0,0.3),
+        0 8px 0 rgba(0,0,0,0.3);
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+      font-weight: bold;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .continue-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.4),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    .continue-button:hover {
+      background: linear-gradient(135deg, #e7b624 0%, #f39c12 50%, #d4ac0d 100%);
+      color: #2c1810;
+      transform: translateY(-2px);
+      box-shadow: 
+        inset 0 6px 0 rgba(255,255,255,0.7),
+        inset 0 -6px 0 rgba(0,0,0,0.3),
+        0 12px 0 rgba(0,0,0,0.3);
+    }
+
+    .continue-button:hover::before {
+      left: 100%;
+    }
+
+    .continue-button:active {
+      transform: translateY(4px);
+      box-shadow: 
+        inset 0 6px 0 rgba(0,0,0,0.3),
+        inset 0 -6px 0 rgba(255,255,255,0.2),
+        0 4px 0 rgba(0,0,0,0.2);
+    }
+
+    /* Estrellas decorativas */
+    .registration-form::after {
+      content: '✦ ✧ ✦';
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(244, 208, 63, 0.6);
+      font-size: 16px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { 
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1);
+      }
+      50% { 
+        opacity: 1;
+        transform: translateX(-50%) scale(1.2);
+      }
+    }
+
+
 
