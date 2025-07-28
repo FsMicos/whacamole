@@ -45,14 +45,14 @@ try:
     modelo = cargar_modelo_compatible('modelo_whac_a_mole_ia.pkl')
     encoder_grupo_edad = cargar_modelo_compatible('encoder_grupo_edad.pkl')
     encoder_dificultad = cargar_modelo_compatible('encoder_dificultad.pkl')
-    
+
     if all([modelo, encoder_grupo_edad, encoder_dificultad]):
         logger.info("🎉 TODOS LOS MODELOS CARGADOS EXITOSAMENTE")
         logger.info(f"📊 Grupos de edad disponibles: {list(encoder_grupo_edad.classes_)}")
         logger.info(f"📊 Dificultades disponibles: {list(encoder_dificultad.classes_)}")
     else:
         logger.error("❌ Algunos modelos no se pudieron cargar")
-        
+
 except Exception as e:
     logger.error(f"❌ Error general cargando modelos: {e}")
     modelo = None
@@ -108,27 +108,27 @@ def calcular_intervalo_progresivo(grupo_edad, dificultad_actual, dificultad_obje
     ✅ MEJORADO: Validación y logging más detallado
     """
     config = INTERVALOS_CONFIG.get(grupo_edad, INTERVALOS_CONFIG['adultos_18+'])
-    
+
     if dificultad_actual not in config or dificultad_objetivo not in config:
         logger.warning(f"Dificultad no válida: {dificultad_actual} -> {dificultad_objetivo}")
         return config['media']['promedio']
-    
+
     intervalo_actual = config[dificultad_actual]['promedio']
     intervalo_objetivo = config[dificultad_objetivo]['promedio']
-    
+
     # Transición gradual
     diferencia = intervalo_objetivo - intervalo_actual
     nuevo_intervalo = intervalo_actual + (diferencia * paso_transicion)
-    
+
     # ✅ VALIDACIÓN DE RANGO
     min_intervalo = min(config[d]['min'] for d in config.keys())
     max_intervalo = max(config[d]['max'] for d in config.keys())
     nuevo_intervalo = max(min_intervalo, min(max_intervalo, nuevo_intervalo))
-    
+
     logger.info(f"📈 Intervalo calculado para {grupo_edad}:")
     logger.info(f"   {dificultad_actual} ({intervalo_actual}ms) -> {dificultad_objetivo} ({intervalo_objetivo}ms)")
     logger.info(f"   Resultado: {int(nuevo_intervalo)}ms (transición {paso_transicion*100:.0f}%)")
-    
+
     return int(nuevo_intervalo)
 
 # ✅ NUEVA FUNCIÓN PARA ANÁLISIS DETALLADO DEL RENDIMIENTO
@@ -138,7 +138,7 @@ def analizar_rendimiento_jugador(aciertos, fallos, tiempo_reaccion, tasa_exito, 
     para mejorar la precisión de la clasificación
     """
     total_intentos = aciertos + fallos
-    
+
     # Definir umbrales específicos por grupo de edad
     umbrales = {
         'niños_4_8': {
@@ -166,9 +166,9 @@ def analizar_rendimiento_jugador(aciertos, fallos, tiempo_reaccion, tasa_exito, 
             'tiempo_lento': 1000
         }
     }
-    
+
     umbral = umbrales.get(grupo_edad, umbrales['adultos_18+'])
-    
+
     # Calcular puntuaciones
     puntuacion_exito = 0
     if tasa_exito >= umbral['exito_alto']:
@@ -177,7 +177,7 @@ def analizar_rendimiento_jugador(aciertos, fallos, tiempo_reaccion, tasa_exito, 
         puntuacion_exito = 1  # Rendimiento medio
     else:
         puntuacion_exito = 0  # Rendimiento bajo
-    
+
     puntuacion_tiempo = 0
     if tiempo_reaccion <= umbral['tiempo_rapido']:
         puntuacion_tiempo = 2  # Muy rápido
@@ -185,10 +185,10 @@ def analizar_rendimiento_jugador(aciertos, fallos, tiempo_reaccion, tasa_exito, 
         puntuacion_tiempo = 1  # Tiempo normal
     else:
         puntuacion_tiempo = 0  # Lento
-    
+
     # Puntuación combinada (0-4)
     puntuacion_total = puntuacion_exito + puntuacion_tiempo
-    
+
     # Sugerencia de dificultad basada en puntuación
     if puntuacion_total >= 3:
         dificultad_sugerida = 'alta'
@@ -199,7 +199,7 @@ def analizar_rendimiento_jugador(aciertos, fallos, tiempo_reaccion, tasa_exito, 
     else:
         dificultad_sugerida = 'baja'
         confianza_bonus = 0.0
-    
+
     return {
         'puntuacion_exito': puntuacion_exito,
         'puntuacion_tiempo': puntuacion_tiempo,
@@ -215,45 +215,45 @@ def interpretar_prediccion_ia(prediccion_encoded, probabilidades, datos_rendimie
     """
     # Decodificar la predicción
     dificultad_predicha = encoder_dificultad.inverse_transform([prediccion_encoded])[0]
-    
+
     # Obtener la confianza máxima
     confianza_maxima = np.max(probabilidades)
-    
+
     # ✅ APLICAR ANÁLISIS HÍBRIDO SI ESTÁ DISPONIBLE
     if datos_rendimiento and datos_rendimiento.get('confianza_bonus', 0) > 0:
         # Si el análisis manual sugiere una dificultad diferente y tiene alta confianza
-        if (datos_rendimiento['puntuacion_total'] >= 3 and 
-            dificultad_predicha != 'alta' and 
-            confianza_maxima < 0.8):
-            
+        if (datos_rendimiento['puntuacion_total'] >= 3 and
+                dificultad_predicha != 'alta' and
+                confianza_maxima < 0.8):
+
             logger.info(f"🔧 Análisis híbrido: Cambiando {dificultad_predicha} -> alta")
             logger.info(f"   Razón: Puntuación total {datos_rendimiento['puntuacion_total']}/4")
             dificultad_predicha = 'alta'
             confianza_maxima = min(0.85, confianza_maxima + datos_rendimiento['confianza_bonus'])
-        
-        elif (datos_rendimiento['puntuacion_total'] <= 1 and 
-              dificultad_predicha != 'baja' and 
+
+        elif (datos_rendimiento['puntuacion_total'] <= 1 and
+              dificultad_predicha != 'baja' and
               confianza_maxima < 0.8):
-            
+
             logger.info(f"🔧 Análisis híbrido: Cambiando {dificultad_predicha} -> baja")
             logger.info(f"   Razón: Puntuación total {datos_rendimiento['puntuacion_total']}/4")
             dificultad_predicha = 'baja'
             confianza_maxima = min(0.85, confianza_maxima + datos_rendimiento['confianza_bonus'])
-    
+
     # Mapear dificultades a acciones numéricas
     mapeo_acciones = {
         'baja': 0,      # Facilitar
         'media': 1,     # Mantener
         'alta': 2       # Dificultar
     }
-    
+
     accion = mapeo_acciones.get(dificultad_predicha, 1)
-    
+
     # Crear probabilidades por acción
     prob_dict = {}
     for i, clase in enumerate(encoder_dificultad.classes_):
         prob_dict[clase] = float(probabilidades[i])
-    
+
     return {
         'dificultad_predicha': dificultad_predicha,
         'accion': accion,
@@ -275,7 +275,7 @@ def health_check():
         'encoder_grupo_edad': encoder_grupo_edad is not None,
         'encoder_dificultad': encoder_dificultad is not None
     }
-    
+
     return jsonify({
         'status': 'healthy' if all(estado_modelos.values()) else 'partial',
         'timestamp': datetime.now().isoformat(),
@@ -303,7 +303,7 @@ def predict_difficulty():
                 'error': 'Modelos no disponibles - verificar logs de inicio',
                 'data': None
             }), 500
-        
+
         # Obtener datos del request
         data = request.get_json()
         if not data:
@@ -312,15 +312,15 @@ def predict_difficulty():
                 'error': 'No se recibieron datos JSON',
                 'data': None
             }), 400
-        
+
         # Log de datos recibidos
         logger.info(f"🔍 === NUEVA PREDICCIÓN ===")
         logger.info(f"📊 Datos recibidos: {data}")
-        
+
         # Validar campos requeridos
-        campos_requeridos = ['age', 'hits_in_window', 'misses_in_window', 
-                           'avg_reaction_window', 'success_rate_window']
-        
+        campos_requeridos = ['age', 'hits_in_window', 'misses_in_window',
+                             'avg_reaction_window', 'success_rate_window']
+
         for campo in campos_requeridos:
             if campo not in data:
                 logger.error(f"❌ Campo faltante: {campo}")
@@ -329,7 +329,7 @@ def predict_difficulty():
                     'error': f'Campo requerido faltante: {campo}',
                     'data': None
                 }), 400
-        
+
         # Extraer y procesar datos
         edad = int(data['age'])
         aciertos = int(data['hits_in_window'])
@@ -338,7 +338,7 @@ def predict_difficulty():
         tasa_exito = float(data['success_rate_window'])
         duracion_ventana = data.get('window_duration', 10)
         dificultad_actual = data.get('current_difficulty', 'media')
-        
+
         # Calcular métricas adicionales
         total_intentos = aciertos + fallos
         if total_intentos == 0:
@@ -347,72 +347,72 @@ def predict_difficulty():
                 'error': 'No hay suficientes datos para evaluar',
                 'data': None
             }), 400
-        
+
         # Calcular puntaje estimado
         puntaje_total = aciertos * 100
-        
+
         # Determinar grupo de edad
         grupo_edad = determinar_grupo_edad(edad)
-        
+
         # ✅ REALIZAR ANÁLISIS DETALLADO DEL RENDIMIENTO
         analisis_rendimiento = analizar_rendimiento_jugador(
             aciertos, fallos, tiempo_reaccion, tasa_exito, grupo_edad
         )
-        
+
         logger.info(f"📈 Análisis de rendimiento:")
         logger.info(f"   Puntuación éxito: {analisis_rendimiento['puntuacion_exito']}/2")
         logger.info(f"   Puntuación tiempo: {analisis_rendimiento['puntuacion_tiempo']}/2")
         logger.info(f"   Puntuación total: {analisis_rendimiento['puntuacion_total']}/4")
         logger.info(f"   Sugerencia: {analisis_rendimiento['dificultad_sugerida']}")
-        
+
         # Preparar características para el modelo
         try:
             grupo_edad_encoded = encoder_grupo_edad.transform([grupo_edad])[0]
         except ValueError as e:
             logger.warning(f"Grupo de edad desconocido: {grupo_edad}, usando 'adultos_18+'")
             grupo_edad_encoded = encoder_grupo_edad.transform(['adultos_18+'])[0]
-        
+
         # Crear array de características (mismo orden que en entrenamiento)
         caracteristicas = np.array([[
             aciertos,           # aciertos
-            fallos,            # fallos  
+            fallos,            # fallos
             tasa_exito,        # tasa_exito
             tiempo_reaccion,   # tiempo_reaccion
             puntaje_total,     # puntaje_total
             grupo_edad_encoded # grupo_edad (encoded)
         ]])
-        
+
         logger.info(f"🧠 Características para modelo: {caracteristicas[0]}")
-        
+
         # Realizar predicción
         prediccion = modelo.predict(caracteristicas)[0]
         probabilidades = modelo.predict_proba(caracteristicas)[0]
-        
+
         logger.info(f"🤖 Predicción cruda del modelo:")
         logger.info(f"   Clase predicha: {prediccion}")
         logger.info(f"   Probabilidades: {probabilidades}")
-        
+
         # ✅ Interpretar resultado con análisis híbrido
         resultado = interpretar_prediccion_ia(prediccion, probabilidades, analisis_rendimiento)
-        
+
         # Calcular intervalo sugerido (progresivo)
         intervalo_sugerido = calcular_intervalo_progresivo(
-            grupo_edad, 
-            dificultad_actual, 
+            grupo_edad,
+            dificultad_actual,
             resultado['dificultad_predicha'],
             paso_transicion=0.4
         )
-        
+
         # ✅ VALIDACIÓN DEL INTERVALO SUGERIDO
         config_grupo = INTERVALOS_CONFIG[grupo_edad]
         intervalo_minimo = min(config_grupo[d]['min'] for d in config_grupo.keys())
         intervalo_maximo = max(config_grupo[d]['max'] for d in config_grupo.keys())
-        
+
         if not (intervalo_minimo <= intervalo_sugerido <= intervalo_maximo):
             logger.warning(f"⚠️ Intervalo fuera de rango: {intervalo_sugerido}ms")
             intervalo_sugerido = max(intervalo_minimo, min(intervalo_maximo, intervalo_sugerido))
             logger.info(f"🔧 Intervalo corregido: {intervalo_sugerido}ms")
-        
+
         # Log final de la predicción
         logger.info(f"🎯 === RESULTADO FINAL ===")
         logger.info(f"   👤 Jugador: {edad} años ({grupo_edad})")
@@ -420,7 +420,7 @@ def predict_difficulty():
         logger.info(f"   🤖 Predicción: {resultado['dificultad_predicha']} (confianza: {resultado['confianza']:.2f})")
         logger.info(f"   ⚡ Intervalo: {dificultad_actual} ({INTERVALOS_CONFIG[grupo_edad][dificultad_actual]['promedio']}ms) -> {resultado['dificultad_predicha']} ({intervalo_sugerido}ms)")
         logger.info(f"   🔧 Análisis híbrido: {'Aplicado' if resultado['analisis_aplicado'] else 'No aplicado'}")
-        
+
         # ✅ RESPUESTA ESTRUCTURADA Y COMPLETA
         response_data = {
             'dificultad_predicha': resultado['dificultad_predicha'],
@@ -454,13 +454,13 @@ def predict_difficulty():
             },
             'timestamp': datetime.now().isoformat()
         }
-        
+
         return jsonify({
             'success': True,
             'error': None,
             'data': response_data
         })
-        
+
     except Exception as e:
         logger.error(f"❌ Error en predict_difficulty: {str(e)}", exc_info=True)
         return jsonify({
@@ -483,13 +483,13 @@ def get_intervals(grupo_edad):
                 'error': f'Grupo de edad no reconocido: {grupo_edad}',
                 'available_groups': list(INTERVALOS_CONFIG.keys())
             }), 400
-        
+
         return jsonify({
             'success': True,
             'grupo_edad': grupo_edad,
             'intervalos': INTERVALOS_CONFIG[grupo_edad]
         })
-        
+
     except Exception as e:
         logger.error(f"Error en get_intervals: {str(e)}")
         return jsonify({
@@ -510,7 +510,7 @@ def model_info():
                 'success': False,
                 'error': 'Modelo no cargado'
             }), 500
-        
+
         info = {
             'success': True,
             'model_type': str(type(modelo).__name__),
@@ -518,15 +518,15 @@ def model_info():
             'dificultades_disponibles': list(encoder_dificultad.classes_) if encoder_dificultad else [],
             'intervalos_configurados': list(INTERVALOS_CONFIG.keys()),
             'caracteristicas_esperadas': [
-                'aciertos', 'fallos', 'tasa_exito', 
+                'aciertos', 'fallos', 'tasa_exito',
                 'tiempo_reaccion', 'puntaje_total', 'grupo_edad'
             ],
             'intervalos_por_grupo': INTERVALOS_CONFIG,
             'version': '2.0.0'
         }
-        
+
         return jsonify(info)
-        
+
     except Exception as e:
         logger.error(f"Error en model_info: {str(e)}")
         return jsonify({
@@ -578,30 +578,30 @@ def test_prediction():
                 }
             }
         ]
-        
+
         resultados = []
-        
+
         for caso in casos_prueba:
             logger.info(f"🧪 Probando: {caso['nombre']}")
-            
+
             # Simular request interno
-            with app.test_request_context('/predict-difficulty', 
-                                        method='POST', 
-                                        json=caso['data']):
+            with app.test_request_context('/predict-difficulty',
+                                          method='POST',
+                                          json=caso['data']):
                 response = predict_difficulty()
-                
+
                 if hasattr(response, 'get_json'):
                     resultado = response.get_json()
                 else:
                     resultado = response
-                
+
                 resultados.append({
                     'caso': caso['nombre'],
                     'datos_entrada': caso['data'],
                     'resultado': resultado,
                     'exito': resultado.get('success', False)
                 })
-        
+
         return jsonify({
             'success': True,
             'total_casos': len(casos_prueba),
@@ -609,7 +609,7 @@ def test_prediction():
             'resultados': resultados,
             'timestamp': datetime.now().isoformat()
         })
-        
+
     except Exception as e:
         logger.error(f"Error en test_prediction: {str(e)}")
         return jsonify({
@@ -628,7 +628,7 @@ def debug_model():
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-        
+
         # Información detallada del modelo
         debug_info = {
             'modelo_cargado': modelo is not None,
@@ -638,38 +638,38 @@ def debug_model():
                 'dificultad': encoder_dificultad is not None
             }
         }
-        
+
         if encoder_grupo_edad:
             debug_info['clases_grupo_edad'] = list(encoder_grupo_edad.classes_)
-        
+
         if encoder_dificultad:
             debug_info['clases_dificultad'] = list(encoder_dificultad.classes_)
-        
+
         # Si se proporcionan datos, hacer predicción con detalles
         if 'age' in data:
             edad = data['age']
             grupo_edad = determinar_grupo_edad(edad)
-            
+
             debug_info['grupo_determinado'] = grupo_edad
             debug_info['intervalos_grupo'] = INTERVALOS_CONFIG.get(grupo_edad)
-            
+
             # Análisis de rendimiento si hay datos suficientes
             if all(k in data for k in ['hits_in_window', 'misses_in_window', 'avg_reaction_window', 'success_rate_window']):
                 analisis = analizar_rendimiento_jugador(
                     data['hits_in_window'],
-                    data['misses_in_window'], 
+                    data['misses_in_window'],
                     data['avg_reaction_window'],
                     data['success_rate_window'],
                     grupo_edad
                 )
                 debug_info['analisis_manual'] = analisis
-        
+
         return jsonify({
             'success': True,
             'debug_info': debug_info,
             'timestamp': datetime.now().isoformat()
         })
-        
+
     except Exception as e:
         logger.error(f"Error en debug_model: {str(e)}")
         return jsonify({
@@ -685,18 +685,18 @@ if __name__ == '__main__':
     # Verificar que los archivos de modelo existen
     archivos_requeridos = [
         'modelo_whac_a_mole_ia.pkl',
-        'encoder_grupo_edad.pkl', 
+        'encoder_grupo_edad.pkl',
         'encoder_dificultad.pkl'
     ]
-    
+
     archivos_faltantes = [archivo for archivo in archivos_requeridos if not os.path.exists(archivo)]
-    
+
     if archivos_faltantes:
         logger.error(f"❌ Archivos de modelo faltantes: {archivos_faltantes}")
         logger.error("Asegúrate de que los archivos .pkl estén en el mismo directorio que este script")
     else:
         logger.info("✅ Todos los archivos de modelo encontrados")
-    
+
     logger.info("🚀 === SERVIDOR ML WHAC-A-MOLE v2.0 ===")
     logger.info("📡 Endpoints disponibles:")
     logger.info("   GET  /health - Verificar estado del servicio")
@@ -705,7 +705,7 @@ if __name__ == '__main__':
     logger.info("   GET  /model-info - Información del modelo")
     logger.info("   GET  /test-prediction - Prueba con casos variados")
     logger.info("   POST /debug-model - Diagnóstico detallado")
-    
+
     if all([modelo, encoder_grupo_edad, encoder_dificultad]):
         logger.info("🎉 === SISTEMA LISTO ===")
         logger.info(f"   🤖 Modelo: {type(modelo).__name__}")
@@ -715,7 +715,7 @@ if __name__ == '__main__':
         logger.info("   ⚡ Intervalos rebalanceados: ACTIVADO")
     else:
         logger.warning("⚠️ Sistema con modelos parciales - funcionalidad limitada")
-    
+
     # Ejecutar servidor
     app.run(
         host='0.0.0.0',

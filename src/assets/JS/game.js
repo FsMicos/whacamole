@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // BOTÓN 8 (9 en tu controlador): Pausa/Reanudar
                 if (buttonNumber === 8) {
-                    console.log(' Botón de pausa/reanudar físico presionado');
+                    console.log(' Botón de pausa físico presionado');
                     if (juegoPausado) {
                         reanudarJuego();
                     } else {
