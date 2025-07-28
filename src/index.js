@@ -58,31 +58,27 @@ sequelize.sync()
             });
         });
 
-        // --- Puerto serial ---
+        // 4. Configurar la lectura del puerto serial del ESP32
         const port = new SerialPort({ path: SERIAL_PORT_NAME, baudRate: 115200 });
         const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
-        console.log(`Escuchando datos del puerto serial: ${SERIAL_PORT_NAME}`);
+        console.log(`Intentando leer datos del puerto serial: ${SERIAL_PORT_NAME}...`);
 
+        // 5. Escuchar los datos que llegan del ESP32
         parser.on('data', (data) => {
-            const trimmedData = data.trim();
-            console.log(`Dato recibido del ESP32: ${trimmedData}`);
+            console.log(`Dato del control recibido: ${data}`);
 
-            const buttonNumber = parseInt(trimmedData);
-            if (!isNaN(buttonNumber)) {
-                const payload = JSON.stringify({ button: buttonNumber });
-
-                gameClients.forEach(client => {
-                    if (client.readyState === 1) {
-                        client.send(payload);
-                    }
-                });
-            }
+            // Retransmitir el dato a TODOS los clientes del juego conectados
+            gameClients.forEach(client => {
+                if (client.readyState === 1) { // 1 === WebSocket.OPEN
+                    client.send(data);
+                }
+            });
         });
 
         port.on('error', (err) => {
             console.error('Error en el puerto serial:', err.message);
-            console.log('Verifica el puerto y cierra el Monitor Serie del IDE de Arduino.');
+            console.log('Asegúrate de que el nombre del puerto sea correcto y no esté en uso (cierra el Monitor Serie del IDE).');
         });
 
     })
