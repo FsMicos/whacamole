@@ -8,6 +8,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalTime = 60;
 
     // ========================================
+// 🧠 CONTROL FÍSICO DESDE ESP32 (WebSocket)
+// ========================================
+
+    const socket = new WebSocket(`ws://${window.location.host}`);
+
+    socket.onopen = () => {
+        console.log('Conectado al servidor del juego vía WebSocket. ¡Control físico activado!');
+    };
+
+    socket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.hasOwnProperty('button')) {
+                const buttonNumber = data.button;
+
+                if (buttonNumber === 8) {
+                    console.log('🛑 Botón de pausa/reanudar presionado');
+                    if (juegoPausado) {
+                        reanudarJuego();
+                    } else {
+                        pausarJuego();
+                    }
+                } else if (buttonNumber === 9) {
+                    console.log('🔄 Botón de reinicio presionado');
+                    reiniciarJuego();
+                } else if (buttonNumber === 10) {
+                    console.log('🏠 Botón de volver al inicio presionado');
+                    volverAlInicio();
+                } else if (buttonNumber >= 0 && buttonNumber < holes.length) {
+                    console.log(`🔨 Golpe recibido del control físico en el agujero #${buttonNumber}`);
+                    attemptHitOnHole(buttonNumber);
+                } else {
+                    console.warn(`⚠️ Número de botón inválido: ${buttonNumber}`);
+                }
+            }
+        } catch (e) {
+            console.error('Error al procesar el mensaje del control:', e);
+        }
+    };
+
+    socket.onclose = () => {
+        console.warn('X Desconectado del servidor WebSocket. El control físico no funcionará.');
+    };
+
+    socket.onerror = (error) => {
+        console.error('Error en la conexión WebSocket:', error);
+    };
+
+    // ========================================
     // 🎵 SISTEMA DE AUDIO COMPLETO INTEGRADO
     // ========================================
     
