@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalTime = 60;
 
     // ========================================
-// 🧠 CONTROL FÍSICO DESDE ESP32 (WebSocket)
-// ========================================
-
+    // 🧠 CONTROL FÍSICO DESDE ESP32 (WebSocket)
+    // ========================================
+    // Se conecta al mismo host y puerto que el servidor Express (http://localhost:3000)
     const socket = new WebSocket(`ws://${window.location.host}`);
 
     socket.onopen = () => {
@@ -20,27 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            // Si el mensaje tiene una propiedad "button", procesamos el botón
             if (data.hasOwnProperty('button')) {
                 const buttonNumber = data.button;
 
+                // BOTÓN 8 (9 en tu controlador): Pausa/Reanudar
                 if (buttonNumber === 8) {
-                    console.log('🛑 Botón de pausa/reanudar presionado');
+                    console.log(' Botón de pausa/reanudar físico presionado');
                     if (juegoPausado) {
                         reanudarJuego();
                     } else {
                         pausarJuego();
                     }
-                } else if (buttonNumber === 9) {
-                    console.log('🔄 Botón de reinicio presionado');
-                    reiniciarJuego();
-                } else if (buttonNumber === 10) {
-                    console.log('🏠 Botón de volver al inicio presionado');
-                    volverAlInicio();
-                } else if (buttonNumber >= 0 && buttonNumber < holes.length) {
-                    console.log(`🔨 Golpe recibido del control físico en el agujero #${buttonNumber}`);
+                }
+                // BOTONES 0-7: Golpear agujeros (comportamiento original)
+                else {
+                    console.log(` Golpe recibido del control físico en el agujero #${buttonNumber}`);
                     attemptHitOnHole(buttonNumber);
-                } else {
-                    console.warn(`⚠️ Número de botón inválido: ${buttonNumber}`);
                 }
             }
         } catch (e) {
